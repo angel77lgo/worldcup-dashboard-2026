@@ -383,35 +383,43 @@ export default function Simulator({ matches, initialStandings }: { matches: any[
                   <h3 style={{ margin: 0, color: 'var(--accent-cyan)', fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{group.name}</h3>
                 </div>
 
-                <table className="standings-table" style={{ background: 'var(--card-bg)' }}>
-                  <thead>
-                    <tr>
-                      <th style={{ padding: '8px', fontSize: '0.7rem' }}></th>
-                      <th style={{ textAlign: 'left', padding: '8px', fontSize: '0.7rem' }}>EQUIPO</th>
-                      <th style={{ padding: '8px', fontSize: '0.7rem' }}>PJ</th>
-                      <th style={{ padding: '8px', fontSize: '0.7rem' }}>DG</th>
-                      <th style={{ padding: '8px', fontSize: '0.7rem' }}>PTS</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {group.entries.map((team: any, idx: number) => {
-                      const isBestThird = idx === 2 && bestThirds.some((t: any) => t.id === team.id);
-                      return (
-                        <tr key={team.id} style={{ background: idx < 2 ? 'rgba(14,165,233,0.06)' : 'transparent', borderLeft: idx < 2 ? '3px solid var(--accent-cyan)' : isBestThird ? '3px solid #7dd3fc' : '3px solid transparent' }}>
-                          <td style={{ padding: '8px', fontWeight: 600, color: 'var(--text-secondary)', width: '28px' }}>{idx + 1}</td>
-                          <td className="team-cell" style={{ padding: '8px' }}>
-                            <img src={team.logo} alt="" style={{ width: '16px' }} />
-                            <span style={{ fontWeight: 600, fontSize: '0.82rem' }}>{team.name}</span>
-                            {isBestThird && <span style={{ fontSize: '0.62rem', background: '#e0f2fe', color: 'var(--accent-cyan)', padding: '1px 5px', borderRadius: '99px', fontWeight: 700 }}>3°✓</span>}
-                          </td>
-                          <td style={{ padding: '8px', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>{team.pj}</td>
-                          <td style={{ padding: '8px', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>{team.gf - team.gc > 0 ? `+${team.gf - team.gc}` : team.gf - team.gc}</td>
-                          <td style={{ padding: '8px', fontWeight: 800 }}>{team.pts}</td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                <div style={{ overflowX: 'auto' }}>
+                  <table className="standings-table" style={{ background: 'var(--card-bg)' }}>
+                    <thead>
+                      <tr>
+                        <th style={{ padding: '8px', fontSize: '0.7rem' }}></th>
+                        <th style={{ textAlign: 'left', padding: '8px', fontSize: '0.7rem' }}>EQUIPO</th>
+                        <th style={{ padding: '8px', fontSize: '0.7rem' }}>PJ</th>
+                        <th style={{ padding: '8px', fontSize: '0.7rem' }}>G</th>
+                        <th style={{ padding: '8px', fontSize: '0.7rem' }}>E</th>
+                        <th style={{ padding: '8px', fontSize: '0.7rem' }}>P</th>
+                        <th style={{ padding: '8px', fontSize: '0.7rem' }}>DG</th>
+                        <th style={{ padding: '8px', fontSize: '0.7rem' }}>PTS</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {group.entries.map((team: any, idx: number) => {
+                        const isBestThird = idx === 2 && bestThirds.some((t: any) => t.id === team.id);
+                        return (
+                          <tr key={team.id} style={{ background: idx < 2 ? 'rgba(14,165,233,0.06)' : 'transparent', borderLeft: idx < 2 ? '3px solid var(--accent-cyan)' : isBestThird ? '3px solid #7dd3fc' : '3px solid transparent' }}>
+                            <td style={{ padding: '8px', fontWeight: 600, color: 'var(--text-secondary)', width: '28px' }}>{idx + 1}</td>
+                            <td className="team-cell" style={{ padding: '8px', whiteSpace: 'nowrap' }}>
+                              <img src={team.logo} alt="" style={{ width: '16px' }} />
+                              <span style={{ fontWeight: 600, fontSize: '0.82rem' }}>{team.name}</span>
+                              {isBestThird && <span style={{ fontSize: '0.62rem', background: '#e0f2fe', color: 'var(--accent-cyan)', padding: '1px 5px', borderRadius: '99px', fontWeight: 700 }}>3°✓</span>}
+                            </td>
+                            <td style={{ padding: '8px', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>{team.pj}</td>
+                            <td style={{ padding: '8px', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>{team.w}</td>
+                            <td style={{ padding: '8px', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>{team.d}</td>
+                            <td style={{ padding: '8px', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>{team.l}</td>
+                            <td style={{ padding: '8px', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>{team.gf - team.gc > 0 ? `+${team.gf - team.gc}` : team.gf - team.gc}</td>
+                            <td style={{ padding: '8px', fontWeight: 800 }}>{team.pts}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
 
                 <div style={{ borderTop: '1px solid var(--border-light)' }}>
                   <button
@@ -433,19 +441,19 @@ export default function Simulator({ matches, initialStandings }: { matches: any[
                         const groupLetter = group.name.replace('Group ', '');
                         return (
                           <div key={m.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: 'var(--card-bg)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-light)', boxShadow: 'var(--shadow-sm)' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
-                              <span style={{ fontSize: '0.65rem', background: '#e8f5e9', color: '#2e7d32', padding: '2px 6px', borderRadius: '4px', fontWeight: 800, textTransform: 'uppercase', minWidth: '18px', textAlign: 'center' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, minWidth: 0 }}>
+                              <span style={{ fontSize: '0.65rem', background: 'var(--accent-primary-light)', color: 'var(--accent-primary)', padding: '2px 6px', borderRadius: '4px', fontWeight: 800, textTransform: 'uppercase', minWidth: '18px', textAlign: 'center' }}>
                                 {groupLetter}
                               </span>
-                              <img src={home?.team.logo} alt="" style={{ width: '18px' }} />
-                              <span style={{ fontWeight: 700, fontSize: '0.82rem' }}>{home?.team.abbreviation}</span>
+                              <img src={home?.team.logo} alt="" style={{ width: '18px', flexShrink: 0 }} />
+                              <span style={{ fontWeight: 700, fontSize: '0.82rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{home?.team.abbreviation}</span>
                             </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: '0 10px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: '0 10px', flexShrink: 0 }}>
                               {isPlayed ? (
                                 <>
-                                  <span style={{ background: '#f1f5f9', color: '#0f172a', padding: '4px 0', width: '32px', textAlign: 'center', borderRadius: '6px', fontWeight: 800, fontSize: '0.9rem', display: 'inline-block' }}>{home?.score}</span>
-                                  <Lock size={12} color="#94a3b8" />
-                                  <span style={{ background: '#f1f5f9', color: '#0f172a', padding: '4px 0', width: '32px', textAlign: 'center', borderRadius: '6px', fontWeight: 800, fontSize: '0.9rem', display: 'inline-block' }}>{away?.score}</span>
+                                  <span style={{ background: 'var(--hover-bg)', color: 'var(--text-primary)', border: '1px solid var(--border-light)', padding: '3px 0', width: '32px', textAlign: 'center', borderRadius: '6px', fontWeight: 800, fontSize: '0.9rem', display: 'inline-block' }}>{home?.score}</span>
+                                  <Lock size={12} color="var(--text-secondary)" />
+                                  <span style={{ background: 'var(--hover-bg)', color: 'var(--text-primary)', border: '1px solid var(--border-light)', padding: '3px 0', width: '32px', textAlign: 'center', borderRadius: '6px', fontWeight: 800, fontSize: '0.9rem', display: 'inline-block' }}>{away?.score}</span>
                                 </>
                               ) : (
                                 <>

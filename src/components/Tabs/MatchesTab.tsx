@@ -1,12 +1,15 @@
 import { useState, useMemo } from 'react';
 import type { MatchEvent, MatchDetail } from '../../types';
+import { SoccerBallIcon } from './SoccerBallIcon';
 
 interface MatchesTabProps {
   matches: MatchEvent[];
   loading: boolean;
+  favorites: string[];
+  toggleFavorite: (id: string) => void;
 }
 
-export function MatchesTab({ matches, loading }: MatchesTabProps) {
+export function MatchesTab({ matches, loading, favorites, toggleFavorite }: MatchesTabProps) {
   const [matchFilter, setMatchFilter] = useState<'anteriores' | 'envivo' | 'proximos'>('proximos');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -101,6 +104,9 @@ export function MatchesTab({ matches, loading }: MatchesTabProps) {
               const away = comp.competitors.find(c => c.homeAway === 'away');
               return (
                 <div key={m.id} className="live-match-huge">
+                  <div className="live-match-huge-fav">
+                    <SoccerBallIcon active={favorites.includes(m.id)} onClick={() => toggleFavorite(m.id)} size={22} />
+                  </div>
                   <div className="live-match-huge-teams">
                     <div className="huge-team">
                       <img src={home?.team.logo || ''} alt="" className="huge-logo" />
@@ -159,6 +165,9 @@ export function MatchesTab({ matches, loading }: MatchesTabProps) {
               const away = comp.competitors.find(c => c.homeAway === 'away');
               return (
                 <div className="live-match-huge upcoming-hero">
+                  <div className="live-match-huge-fav">
+                    <SoccerBallIcon active={favorites.includes(m.id)} onClick={() => toggleFavorite(m.id)} size={22} />
+                  </div>
                   <div className="live-match-huge-teams">
                     <div className="huge-team">
                       <img src={home?.team.logo || ''} alt="" className="huge-logo" />
@@ -244,8 +253,11 @@ export function MatchesTab({ matches, loading }: MatchesTabProps) {
                       const away = comp?.competitors.find(c => c.homeAway === 'away');
                       return (
                         <div key={m.id} className="match-card">
-                          <div className="match-header">
-                            <span>{new Date(m.date).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })} hs</span>
+                          <div className="match-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <span>{new Date(m.date).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })} hs</span>
+                              <SoccerBallIcon active={favorites.includes(m.id)} onClick={(e) => { e.stopPropagation(); toggleFavorite(m.id); }} size={16} />
+                            </span>
                           </div>
                           <div className="match-team-row">
                             <div className="match-team-info">
@@ -288,8 +300,11 @@ export function MatchesTab({ matches, loading }: MatchesTabProps) {
               const isLive = m.status.type.state === 'in';
               return (
                 <div key={m.id} className={`match-card ${isLive ? 'is-live' : ''}`}>
-                  <div className="match-header">
-                    <span>{new Date(m.date).toLocaleDateString('es-ES', { month: 'short', day: 'numeric' })}</span>
+                  <div className="match-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span>{new Date(m.date).toLocaleDateString('es-ES', { month: 'short', day: 'numeric' })}</span>
+                      <SoccerBallIcon active={favorites.includes(m.id)} onClick={(e) => { e.stopPropagation(); toggleFavorite(m.id); }} size={16} />
+                    </span>
                     <span style={{ color: isLive ? 'var(--accent-live)' : 'inherit' }}>
                       {isLive ? m.status.displayClock : m.status.type.shortDetail}
                     </span>

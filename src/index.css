@@ -7,6 +7,7 @@
   
   /* Glassmorphism settings */
   --glass-bg: rgba(255, 255, 255, 0.65);
+  --glass-bg-hover: rgba(255, 255, 255, 0.85);
   --glass-border: rgba(255, 255, 255, 0.5);
   --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
   
@@ -42,6 +43,7 @@
   --bg-gradient: radial-gradient(circle at top left, #1E293B, #0B0F19);
   
   --glass-bg: rgba(17, 24, 39, 0.65);
+  --glass-bg-hover: rgba(30, 41, 59, 0.8);
   --glass-border: rgba(255, 255, 255, 0.06);
   --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
   
@@ -547,7 +549,7 @@ button {
 .match-card:hover {
   box-shadow: var(--shadow-md);
   transform: translateY(-4px);
-  background: rgba(255, 255, 255, 0.85);
+  background: var(--glass-bg-hover);
 }
 
 .match-card.is-live::before {
@@ -962,3 +964,58 @@ button {
   padding: 2px 6px;
   border-radius: 4px;
 }
+
+/* Soccer ball favorites styles */
+.soccer-ball-fav-btn {
+  background: transparent;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 6px;
+  opacity: 0.7;
+}
+
+.soccer-ball-fav-btn:hover {
+  background: var(--glass-border);
+  transform: scale(1.15) rotate(15deg);
+  opacity: 1;
+}
+
+.soccer-ball-fav-btn:active {
+  transform: scale(0.95);
+}
+
+.soccer-ball-fav-btn.active {
+  color: #f59e0b !important;
+  filter: drop-shadow(0 0 4px rgba(245, 158, 11, 0.3));
+  opacity: 1;
+}
+
+.soccer-ball-fav-btn.active svg {
+  transform: rotate(360deg);
+}
+
+.match-card {
+  position: relative;
+}
+
+.match-card-fav-container {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 10;
+}
+
+.live-match-huge {
+  position: relative;
+}
+
+.live-match-huge-fav {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 10;
+}
+

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-export type TabType = 'partidos' | 'grupos' | 'eliminatorias' | 'estadisticas' | 'simulador';
+export type TabType = 'partidos' | 'grupos' | 'eliminatorias' | 'estadisticas' | 'simulador' | 'favoritos';
 
 const getInitialTab = (): TabType => {
   const hash = window.location.hash;
@@ -8,12 +8,14 @@ const getInitialTab = (): TabType => {
   if (hash === '#/grupos' || hash === '#grupos') return 'grupos';
   if (hash === '#/eliminatorias' || hash === '#eliminatorias') return 'eliminatorias';
   if (hash === '#/equipos' || hash === '#equipos') return 'estadisticas';
+  if (hash === '#/favoritos' || hash === '#favoritos') return 'favoritos';
 
   const path = window.location.pathname;
   if (path === '/simulator' || path === '/simulator/') return 'simulador';
   if (path === '/grupos') return 'grupos';
   if (path === '/eliminatorias') return 'eliminatorias';
   if (path === '/equipos') return 'estadisticas';
+  if (path === '/favoritos') return 'favoritos';
   return 'partidos';
 };
 
@@ -27,6 +29,7 @@ export function useRouting() {
     else if (tab === 'grupos') hash = '#/grupos';
     else if (tab === 'eliminatorias') hash = '#/eliminatorias';
     else if (tab === 'estadisticas') hash = '#/equipos';
+    else if (tab === 'favoritos') hash = '#/favoritos';
     window.location.hash = hash;
   };
 

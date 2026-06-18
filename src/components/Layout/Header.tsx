@@ -29,6 +29,7 @@ export function Header({ darkMode, setDarkMode, isRefreshing, fetchData, activeT
       <nav className="controls-bar">
         <div className="tabs">
           <button className={`tab ${activeTab === 'partidos' ? 'active' : ''}`} onClick={() => onTabChange('partidos')}>Partidos</button>
+          <button className={`tab ${activeTab === 'favoritos' ? 'active' : ''}`} onClick={() => onTabChange('favoritos')}>⚽ Favoritos</button>
           <button className={`tab ${activeTab === 'grupos' ? 'active' : ''}`} onClick={() => onTabChange('grupos')}>Grupos</button>
           <button className={`tab ${activeTab === 'eliminatorias' ? 'active' : ''}`} onClick={() => onTabChange('eliminatorias')}>Eliminatorias</button>
           <button className={`tab ${activeTab === 'estadisticas' ? 'active' : ''}`} onClick={() => onTabChange('estadisticas')}>Equipos</button>
