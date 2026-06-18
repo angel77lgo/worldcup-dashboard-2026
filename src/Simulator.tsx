@@ -1,55 +1,9 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Lock, Edit3, ChevronDown, ChevronUp, Shuffle } from 'lucide-react';
-
-// Estructura oficial de los 16avos (Round of 32) - FIFA WC 2026
-// Los 3ro clasificados se denotan con '3rd(X/Y/Z)' = mejor 3ro de esos grupos
-const ROUND_OF_32: Array<{ match: number; home: string; away: string }> = [
-  { match: 73, home: '2A', away: '2B' },
-  { match: 74, home: '1E', away: '3rd(ABCDF)' },
-  { match: 75, home: '1F', away: '2C' },
-  { match: 76, home: '1C', away: '2F' },
-  { match: 77, home: '1I', away: '3rd(CDFGH)' },
-  { match: 78, home: '2E', away: '2I' },
-  { match: 79, home: '1A', away: '3rd(CEFHI)' },
-  { match: 80, home: '1L', away: '3rd(EHIJK)' },
-  { match: 81, home: '1D', away: '3rd(BEFIJ)' },
-  { match: 82, home: '1G', away: '3rd(AEHIJ)' },
-  { match: 83, home: '2K', away: '2L' },
-  { match: 84, home: '1H', away: '2J' },
-  { match: 85, home: '1B', away: '3rd(EFGIJ)' },
-  { match: 86, home: '1J', away: '2H' },
-  { match: 87, home: '1K', away: '3rd(DEIJL)' },
-  { match: 88, home: '2D', away: '2G' },
-];
-
-// Estructura de 8vos (Round of 16) - ganadores de los cruces anteriores
-const ROUND_OF_16 = [
-  { match: 89, home: 'W74', away: 'W77' },
-  { match: 90, home: 'W73', away: 'W75' },
-  { match: 91, home: 'W76', away: 'W78' },
-  { match: 92, home: 'W79', away: 'W80' },
-  { match: 93, home: 'W83', away: 'W84' },
-  { match: 94, home: 'W81', away: 'W82' },
-  { match: 95, home: 'W86', away: 'W88' },
-  { match: 96, home: 'W85', away: 'W87' },
-];
-
-// Cuartos de final
-const QUARTERFINALS = [
-  { match: 97, home: 'W89', away: 'W90' },
-  { match: 98, home: 'W93', away: 'W94' },
-  { match: 99, home: 'W91', away: 'W92' },
-  { match: 100, home: 'W95', away: 'W96' },
-];
-
-// Semifinales
-const SEMIFINALS = [
-  { match: 101, home: 'W97', away: 'W98' },
-  { match: 102, home: 'W99', away: 'W100' },
-];
-
-const FINAL = [{ match: 104, home: 'W101', away: 'W102' }];
-const THIRD = [{ match: 103, home: 'L101', away: 'L102' }];
+import { MatchEvent } from './types';
+import { 
+  ROUND_OF_32, ROUND_OF_16, QUARTERFINALS, SEMIFINALS, FINAL, THIRD 
+} from './utils/constants';
 
 type TeamSlot = { name: string; logo?: string; abbr?: string } | null;
 
@@ -574,7 +528,7 @@ export default function Simulator({ matches, initialStandings }: { matches: any[
           return all.find(m => m.match === matchNum)!;
         };
 
-        const leftR32 = [74, 77, 73, 75, 83, 84, 81, 82].map(getMatchByNum);
+        const leftR32 = [75, 78, 73, 76, 83, 84, 81, 82].map(getMatchByNum);
         const leftR16 = [89, 90, 93, 94].map(getMatchByNum);
         const leftQF = [97, 98].map(getMatchByNum);
         const leftSF = [101].map(getMatchByNum);
@@ -582,7 +536,20 @@ export default function Simulator({ matches, initialStandings }: { matches: any[
         const rightSF = [102].map(getMatchByNum);
         const rightQF = [99, 100].map(getMatchByNum);
         const rightR16 = [91, 92, 95, 96].map(getMatchByNum);
-        const rightR32 = [76, 78, 79, 80, 86, 88, 85, 87].map(getMatchByNum);
+        const rightR32 = [74, 77, 79, 80, 86, 87, 85, 88].map(getMatchByNum);
+
+        const Col = ({ title, flexWeight, matches, rightAligned }: { title: string, flexWeight: number, matches: any[], rightAligned?: boolean }) => (
+          <div style={{ display: 'flex', flexDirection: 'column', minWidth: '190px' }}>
+            <div style={{ textAlign: 'center', fontWeight: 700, fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '2px solid var(--border-light)', paddingBottom: '8px', marginBottom: '16px' }}>{title}</div>
+            <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+              {matches.map(m => (
+                <div key={m.match} style={{ flex: flexWeight, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '6px 0' }}>
+                  {renderKnockoutMatch(m, undefined, rightAligned)}
+                </div>
+              ))}
+            </div>
+          </div>
+        );
 
         return (
           <div style={{ marginTop: '40px' }}>
@@ -591,6 +558,7 @@ export default function Simulator({ matches, initialStandings }: { matches: any[
             <div style={{ 
               display: 'flex', 
               justifyContent: 'flex-start',
+              alignItems: 'stretch',
               gap: '15px', 
               overflowX: 'auto', 
               padding: '30px 20px', 
@@ -602,22 +570,10 @@ export default function Simulator({ matches, initialStandings }: { matches: any[
             }}>
               {/* LADO IZQUIERDO */}
               <div style={{ display: 'flex', gap: '15px' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-around', gap: '8px', minWidth: '190px' }}>
-                  <div style={{ textAlign: 'center', fontWeight: 700, fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '2px solid var(--border-light)', paddingBottom: '8px', marginBottom: '10px' }}>16avos</div>
-                  {leftR32.map(m => <div key={m.match}>{renderKnockoutMatch(m)}</div>)}
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-around', gap: '8px', minWidth: '190px' }}>
-                  <div style={{ textAlign: 'center', fontWeight: 700, fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '2px solid var(--border-light)', paddingBottom: '8px', marginBottom: '10px' }}>Octavos</div>
-                  {leftR16.map(m => <div key={m.match}>{renderKnockoutMatch(m)}</div>)}
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-around', gap: '8px', minWidth: '190px' }}>
-                  <div style={{ textAlign: 'center', fontWeight: 700, fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '2px solid var(--border-light)', paddingBottom: '8px', marginBottom: '10px' }}>Cuartos</div>
-                  {leftQF.map(m => <div key={m.match}>{renderKnockoutMatch(m)}</div>)}
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-around', gap: '8px', minWidth: '190px' }}>
-                  <div style={{ textAlign: 'center', fontWeight: 700, fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '2px solid var(--border-light)', paddingBottom: '8px', marginBottom: '10px' }}>Semis</div>
-                  {leftSF.map(m => <div key={m.match}>{renderKnockoutMatch(m)}</div>)}
-                </div>
+                <Col title="16avos" flexWeight={1} matches={leftR32} />
+                <Col title="Octavos" flexWeight={2} matches={leftR16} />
+                <Col title="Cuartos" flexWeight={4} matches={leftQF} />
+                <Col title="Semis" flexWeight={8} matches={leftSF} />
               </div>
 
               {/* CENTRO: FINAL Y TERCER PUESTO */}
@@ -639,22 +595,10 @@ export default function Simulator({ matches, initialStandings }: { matches: any[
 
               {/* LADO DERECHO */}
               <div style={{ display: 'flex', gap: '15px' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-around', gap: '8px', minWidth: '190px' }}>
-                  <div style={{ textAlign: 'center', fontWeight: 700, fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '2px solid var(--border-light)', paddingBottom: '8px', marginBottom: '10px' }}>Semis</div>
-                  {rightSF.map(m => <div key={m.match}>{renderKnockoutMatch(m, undefined, true)}</div>)}
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-around', gap: '8px', minWidth: '190px' }}>
-                  <div style={{ textAlign: 'center', fontWeight: 700, fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '2px solid var(--border-light)', paddingBottom: '8px', marginBottom: '10px' }}>Cuartos</div>
-                  {rightQF.map(m => <div key={m.match}>{renderKnockoutMatch(m, undefined, true)}</div>)}
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-around', gap: '8px', minWidth: '190px' }}>
-                  <div style={{ textAlign: 'center', fontWeight: 700, fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '2px solid var(--border-light)', paddingBottom: '8px', marginBottom: '10px' }}>Octavos</div>
-                  {rightR16.map(m => <div key={m.match}>{renderKnockoutMatch(m, undefined, true)}</div>)}
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-around', gap: '8px', minWidth: '190px' }}>
-                  <div style={{ textAlign: 'center', fontWeight: 700, fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '2px solid var(--border-light)', paddingBottom: '8px', marginBottom: '10px' }}>16avos</div>
-                  {rightR32.map(m => <div key={m.match}>{renderKnockoutMatch(m, undefined, true)}</div>)}
-                </div>
+                <Col title="Semis" flexWeight={8} matches={rightSF} rightAligned />
+                <Col title="Cuartos" flexWeight={4} matches={rightQF} rightAligned />
+                <Col title="Octavos" flexWeight={2} matches={rightR16} rightAligned />
+                <Col title="16avos" flexWeight={1} matches={rightR32} rightAligned />
               </div>
             </div>
           </div>
