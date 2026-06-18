@@ -432,30 +432,30 @@ export default function Simulator({ matches, initialStandings }: { matches: any[
 
                         const groupLetter = group.name.replace('Group ', '');
                         return (
-                          <div key={m.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: 'var(--card-bg)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', boxShadow: 'var(--shadow-sm)' }}>
+                          <div key={m.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: 'var(--card-bg)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-light)', boxShadow: 'var(--shadow-sm)' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
-                              <span style={{ fontSize: '0.62rem', background: '#e8f5e9', color: '#2e7d32', padding: '2px 6px', borderRadius: '4px', fontWeight: 800, textTransform: 'uppercase' }}>
-                                G-{groupLetter}
+                              <span style={{ fontSize: '0.65rem', background: '#e8f5e9', color: '#2e7d32', padding: '2px 6px', borderRadius: '4px', fontWeight: 800, textTransform: 'uppercase', minWidth: '18px', textAlign: 'center' }}>
+                                {groupLetter}
                               </span>
                               <img src={home?.team.logo} alt="" style={{ width: '18px' }} />
                               <span style={{ fontWeight: 700, fontSize: '0.82rem' }}>{home?.team.abbreviation}</span>
                             </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', margin: '0 10px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: '0 10px' }}>
                               {isPlayed ? (
                                 <>
-                                  <span style={{ background: '#f1f5f9', padding: '3px 9px', borderRadius: '4px', fontWeight: 800 }}>{home?.score}</span>
-                                  <Lock size={11} color="#94a3b8" />
-                                  <span style={{ background: '#f1f5f9', padding: '3px 9px', borderRadius: '4px', fontWeight: 800 }}>{away?.score}</span>
+                                  <span style={{ background: '#f1f5f9', color: '#0f172a', padding: '4px 0', width: '32px', textAlign: 'center', borderRadius: '6px', fontWeight: 800, fontSize: '0.9rem', display: 'inline-block' }}>{home?.score}</span>
+                                  <Lock size={12} color="#94a3b8" />
+                                  <span style={{ background: '#f1f5f9', color: '#0f172a', padding: '4px 0', width: '32px', textAlign: 'center', borderRadius: '6px', fontWeight: 800, fontSize: '0.9rem', display: 'inline-block' }}>{away?.score}</span>
                                 </>
                               ) : (
                                 <>
                                   <input type="text" inputMode="numeric" pattern="[0-9]*" maxLength={2}
-                                    style={{ width: '36px', padding: '5px', textAlign: 'center', fontWeight: 700, border: '1.5px solid var(--accent-primary)', borderRadius: '5px', outline: 'none', background: 'var(--accent-primary-light)', color: 'var(--accent-primary)', fontFamily: 'inherit' }}
+                                    style={{ width: '32px', padding: '4px 0', textAlign: 'center', fontWeight: 700, border: '1.5px solid var(--accent-primary)', borderRadius: '6px', outline: 'none', background: 'transparent', color: 'var(--text-primary)', fontFamily: 'inherit', fontSize: '0.9rem' }}
                                     value={simScores[m.id]?.home ?? ''}
                                     onChange={(e) => handleScoreChange(m.id, 'home', e.target.value)} />
-                                  <Edit3 size={11} color="var(--accent-primary)" />
+                                  <Edit3 size={12} color="var(--accent-primary)" />
                                   <input type="text" inputMode="numeric" pattern="[0-9]*" maxLength={2}
-                                    style={{ width: '36px', padding: '5px', textAlign: 'center', fontWeight: 700, border: '1.5px solid var(--accent-primary)', borderRadius: '5px', outline: 'none', background: 'var(--accent-primary-light)', color: 'var(--accent-primary)', fontFamily: 'inherit' }}
+                                    style={{ width: '32px', padding: '4px 0', textAlign: 'center', fontWeight: 700, border: '1.5px solid var(--accent-primary)', borderRadius: '6px', outline: 'none', background: 'transparent', color: 'var(--text-primary)', fontFamily: 'inherit', fontSize: '0.9rem' }}
                                     value={simScores[m.id]?.away ?? ''}
                                     onChange={(e) => handleScoreChange(m.id, 'away', e.target.value)} />
                                 </>
