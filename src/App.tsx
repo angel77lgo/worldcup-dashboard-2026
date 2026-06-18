@@ -1,4 +1,3 @@
-import React from 'react';
 import { useWorldCupData } from './hooks/useWorldCupData';
 import { useTheme } from './hooks/useTheme';
 import { useRouting } from './hooks/useRouting';

@@ -1,6 +1,5 @@
-import React from 'react';
 import { RefreshCw, Sun, Moon } from 'lucide-react';
-import { TabType } from '../../hooks/useRouting';
+import type { TabType } from '../../hooks/useRouting';
 
 interface HeaderProps {
   darkMode: boolean;

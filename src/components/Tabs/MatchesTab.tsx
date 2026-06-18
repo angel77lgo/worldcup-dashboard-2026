@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { MatchEvent, MatchDetail } from '../../types';
+import { useState, useMemo } from 'react';
+import type { MatchEvent, MatchDetail } from '../../types';
 
 interface MatchesTabProps {
   matches: MatchEvent[];

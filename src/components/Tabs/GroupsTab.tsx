@@ -1,5 +1,4 @@
-import React from 'react';
-import { GroupStanding } from '../../types';
+import type { GroupStanding } from '../../types';
 import { getStat } from '../../hooks/useWorldCupData';
 
 interface GroupsTabProps {

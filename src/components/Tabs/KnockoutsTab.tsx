@@ -1,5 +1,5 @@
 import React from 'react';
-import { MatchEvent } from '../../types';
+import type { MatchEvent } from '../../types';
 import { 
   ROUND_OF_32, R32_ORDER, R16_ORDER, QF_ORDER, SF_ORDER 
 } from '../../utils/constants';

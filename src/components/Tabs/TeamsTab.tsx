@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { GroupStanding } from '../../types';
+import { useState } from 'react';
+import type { GroupStanding } from '../../types';
 import { getStat } from '../../hooks/useWorldCupData';
 
 interface TeamsTabProps {

@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { MatchEvent, GroupStanding, StandingEntry } from '../types';
+import type { MatchEvent, GroupStanding, StandingEntry } from '../types';
 
 export const getStat = (entry: StandingEntry, statName: string): number => {
   const found = entry.stats.find(s => s.name === statName || s.type === statName);

@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Lock, Edit3, ChevronDown, ChevronUp, Shuffle } from 'lucide-react';
-import { MatchEvent } from './types';
 import { 
   ROUND_OF_32, ROUND_OF_16, QUARTERFINALS, SEMIFINALS, FINAL, THIRD 
 } from './utils/constants';
@@ -374,7 +373,7 @@ export default function Simulator({ matches, initialStandings }: { matches: any[
       <div style={{ marginBottom: '60px' }}>
         <SectionTitle title="Fase de Grupos" subtitle="Rellena los marcadores de los partidos pendientes" />
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))', gap: '24px' }}>
-          {simulatedStandings.map(group => {
+          {simulatedStandings.map((group: any) => {
             const groupMatchesList = matchesByGroup[group.name] || [];
             const isExpanded = expandedGroups[group.name] || false;
 
@@ -396,7 +395,7 @@ export default function Simulator({ matches, initialStandings }: { matches: any[
                   </thead>
                   <tbody>
                     {group.entries.map((team: any, idx: number) => {
-                      const isBestThird = idx === 2 && bestThirds.some(t => t.id === team.id);
+                      const isBestThird = idx === 2 && bestThirds.some((t: any) => t.id === team.id);
                       return (
                         <tr key={team.id} style={{ background: idx < 2 ? 'rgba(14,165,233,0.06)' : 'transparent', borderLeft: idx < 2 ? '3px solid var(--accent-cyan)' : isBestThird ? '3px solid #7dd3fc' : '3px solid transparent' }}>
                           <td style={{ padding: '8px', fontWeight: 600, color: 'var(--text-secondary)', width: '28px' }}>{idx + 1}</td>
@@ -425,7 +424,7 @@ export default function Simulator({ matches, initialStandings }: { matches: any[
 
                   {isExpanded && (
                     <div style={{ padding: '14px', background: 'var(--bg-color)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                      {groupMatchesList.map(m => {
+                      {groupMatchesList.map((m: any) => {
                         const comp = m.competitions[0];
                         const home = comp.competitors.find((c: any) => c.homeAway === 'home');
                         const away = comp.competitors.find((c: any) => c.homeAway === 'away');
