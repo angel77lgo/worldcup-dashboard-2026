@@ -301,7 +301,7 @@ export default function Simulator({ matches, initialStandings }: { matches: any[
   // ---------- ESTILOS REUTILIZABLES ----------
   const cardStyle: React.CSSProperties = { background: 'var(--card-bg)', border: '1px solid var(--border-light)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-md)', overflow: 'hidden' };
 
-  const KnockoutMatch = ({ matchDef, label }: { matchDef: { match: number; home: string; away: string }; label?: string }) => {
+  const renderKnockoutMatch = (matchDef: { match: number; home: string; away: string }, label?: string) => {
     const homeTeam = resolveSlot(matchDef.home);
     const awayTeam = resolveSlot(matchDef.away);
     const score = knockoutScores[matchDef.match];
@@ -588,7 +588,7 @@ export default function Simulator({ matches, initialStandings }: { matches: any[
               <div style={{ textAlign: 'center', fontWeight: 700, fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '2px solid var(--border-light)', paddingBottom: '8px', marginBottom: '10px' }}>
                 16avos de Final
               </div>
-              {ROUND_OF_32.map(m => <KnockoutMatch key={m.match} matchDef={m} />)}
+              {ROUND_OF_32.map(m => <div key={m.match}>{renderKnockoutMatch(m)}</div>)}
             </div>
 
             {/* 8VOS */}
@@ -596,7 +596,7 @@ export default function Simulator({ matches, initialStandings }: { matches: any[
               <div style={{ textAlign: 'center', fontWeight: 700, fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '2px solid var(--border-light)', paddingBottom: '8px', marginBottom: '10px' }}>
                 Octavos de Final
               </div>
-              {ROUND_OF_16.map(m => <KnockoutMatch key={m.match} matchDef={m} />)}
+              {ROUND_OF_16.map(m => <div key={m.match}>{renderKnockoutMatch(m)}</div>)}
             </div>
 
             {/* CUARTOS */}
@@ -604,7 +604,7 @@ export default function Simulator({ matches, initialStandings }: { matches: any[
               <div style={{ textAlign: 'center', fontWeight: 700, fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '2px solid var(--border-light)', paddingBottom: '8px', marginBottom: '10px' }}>
                 Cuartos de Final
               </div>
-              {QUARTERFINALS.map(m => <KnockoutMatch key={m.match} matchDef={m} />)}
+              {QUARTERFINALS.map(m => <div key={m.match}>{renderKnockoutMatch(m)}</div>)}
             </div>
 
             {/* SEMIS */}
@@ -612,7 +612,7 @@ export default function Simulator({ matches, initialStandings }: { matches: any[
               <div style={{ textAlign: 'center', fontWeight: 700, fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '2px solid var(--border-light)', paddingBottom: '8px', marginBottom: '10px' }}>
                 Semifinales
               </div>
-              {SEMIFINALS.map(m => <KnockoutMatch key={m.match} matchDef={m} />)}
+              {SEMIFINALS.map(m => <div key={m.match}>{renderKnockoutMatch(m)}</div>)}
             </div>
 
             {/* FINALES */}
@@ -621,14 +621,14 @@ export default function Simulator({ matches, initialStandings }: { matches: any[
                 <div style={{ textAlign: 'center', fontWeight: 700, fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '2px solid var(--border-light)', paddingBottom: '8px', marginBottom: '12px' }}>
                   Tercer Puesto
                 </div>
-                {THIRD.map(m => <KnockoutMatch key={m.match} matchDef={m} label="3° Lugar" />)}
+                {THIRD.map(m => <div key={m.match}>{renderKnockoutMatch(m, '3° Lugar')}</div>)}
               </div>
               
               <div>
                 <div style={{ textAlign: 'center', fontWeight: 700, fontSize: '0.85rem', color: 'var(--accent-cyan)', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '2px solid var(--accent-cyan)', paddingBottom: '8px', marginBottom: '12px' }}>
                   🏆 Gran Final
                 </div>
-                {FINAL.map(m => <KnockoutMatch key={m.match} matchDef={m} label="Final" />)}
+                {FINAL.map(m => <div key={m.match}>{renderKnockoutMatch(m, 'Final')}</div>)}
               </div>
             </div>
           </div>

@@ -414,6 +414,13 @@ function App() {
     );
   };
 
+  const getMatchVenue = (comp: any): { name: string; state: string } | null => {
+    if (!comp?.venue?.fullName) return null;
+    const city = comp.venue.address?.city || '';
+    const parts = city.split(',').map((s: string) => s.trim());
+    return { name: comp.venue.fullName, state: parts.length > 1 ? parts[1] : '' };
+  };
+
   return (
     <div>
       <header className="header">
@@ -453,6 +460,16 @@ function App() {
                       <div className="huge-name">{away?.team.displayName}</div>
                     </div>
                   </div>
+
+                  {(() => {
+                    const v = getMatchVenue(comp);
+                    return v ? (
+                      <div className="hero-venue">
+                        <span>{v.name}</span>
+                        {v.state && <><span className="hero-venue-sep">·</span><span>{v.state}</span></>}
+                      </div>
+                    ) : null;
+                  })()}
                   
                   {/* Detalles del partido: Goles, Tarjetas */}
                   {comp.details && comp.details.length > 0 && (
@@ -512,6 +529,16 @@ function App() {
                       <div className="huge-name">{away?.team.displayName}</div>
                     </div>
                   </div>
+
+                  {(() => {
+                    const v = getMatchVenue(comp);
+                    return v ? (
+                      <div className="hero-venue">
+                        <span>{v.name}</span>
+                        {v.state && <><span className="hero-venue-sep">·</span><span>{v.state}</span></>}
+                      </div>
+                    ) : null;
+                  })()}
 
                   <div style={{ marginTop: '10px', textAlign: 'center' }}>
                     <a href={(m as any).links?.[0]?.href || `https://www.google.com/search?q=donde+ver+${home?.team.displayName}+vs+${away?.team.displayName}`} target="_blank" rel="noreferrer" style={{
@@ -603,53 +630,71 @@ function App() {
                                    <span>{home?.team.displayName}</span>
                                  </div>
                                </div>
-                               <div className="match-team-row">
-                                 <div className="match-team-info">
-                                   <img src={away?.team.logo || ''} alt="" className="match-team-logo" />
-                                   <span>{away?.team.displayName}</span>
-                                 </div>
-                               </div>
-                             </div>
-                           );
-                         })}
-                       </div>
-                     </div>
-                   );
-                })}
-                {groupedUpcomingMatches.length === 0 && (
-                   <div className="empty-state">No hay próximos partidos programados.</div>
-                )}
-             </div>
-          ) : (
-             // STANDARD GRID FOR OTHERS (LIVE, PAST)
-             <div className="matches-grid">
-               {filteredMatches.map(m => {
-                 const comp = m.competitions[0];
-                 const home = comp?.competitors.find(c => c.homeAway === 'home');
-                 const away = comp?.competitors.find(c => c.homeAway === 'away');
-                 const isLive = m.status.type.state === 'in';
-                 return (
-                   <div key={m.id} className={`match-card ${isLive ? 'is-live' : ''}`}>
-                     <div className="match-header">
-                       <span>{new Date(m.date).toLocaleDateString('es-ES', { month: 'short', day: 'numeric' })}</span>
-                       <span style={{ color: isLive ? 'var(--accent-live)' : 'inherit' }}>
-                         {isLive ? m.status.displayClock : m.status.type.shortDetail}
-                       </span>
-                     </div>
-                     <div className="match-team-row">
-                       <div className="match-team-info">
-                         <img src={home?.team.logo || ''} alt="" className="match-team-logo" />
-                         <span>{home?.team.displayName}</span>
-                       </div>
-                       <span className="match-score">{m.status.type.state === 'pre' ? '-' : home?.score}</span>
-                     </div>
-                     <div className="match-team-row">
-                       <div className="match-team-info">
-                         <img src={away?.team.logo || ''} alt="" className="match-team-logo" />
-                         <span>{away?.team.displayName}</span>
-                       </div>
-                       <span className="match-score">{m.status.type.state === 'pre' ? '-' : away?.score}</span>
-                     </div>
+                                <div className="match-team-row">
+                                  <div className="match-team-info">
+                                    <img src={away?.team.logo || ''} alt="" className="match-team-logo" />
+                                    <span>{away?.team.displayName}</span>
+                                  </div>
+                                </div>
+                                {(() => {
+                                  const v = getMatchVenue(comp);
+                                  return v ? (
+                                    <div className="match-venue">
+                                      <span>{v.name}</span>
+                                      {v.state && <><span className="match-venue-sep">·</span><span>{v.state}</span></>}
+                                    </div>
+                                  ) : null;
+                                })()}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                 })}
+                 {groupedUpcomingMatches.length === 0 && (
+                    <div className="empty-state">No hay próximos partidos programados.</div>
+                 )}
+              </div>
+           ) : (
+              // STANDARD GRID FOR OTHERS (LIVE, PAST)
+              <div className="matches-grid">
+                {filteredMatches.map(m => {
+                  const comp = m.competitions[0];
+                  const home = comp?.competitors.find(c => c.homeAway === 'home');
+                  const away = comp?.competitors.find(c => c.homeAway === 'away');
+                  const isLive = m.status.type.state === 'in';
+                  return (
+                    <div key={m.id} className={`match-card ${isLive ? 'is-live' : ''}`}>
+                      <div className="match-header">
+                        <span>{new Date(m.date).toLocaleDateString('es-ES', { month: 'short', day: 'numeric' })}</span>
+                        <span style={{ color: isLive ? 'var(--accent-live)' : 'inherit' }}>
+                          {isLive ? m.status.displayClock : m.status.type.shortDetail}
+                        </span>
+                      </div>
+                      <div className="match-team-row">
+                        <div className="match-team-info">
+                          <img src={home?.team.logo || ''} alt="" className="match-team-logo" />
+                          <span>{home?.team.displayName}</span>
+                        </div>
+                        <span className="match-score">{m.status.type.state === 'pre' ? '-' : home?.score}</span>
+                      </div>
+                      <div className="match-team-row">
+                        <div className="match-team-info">
+                          <img src={away?.team.logo || ''} alt="" className="match-team-logo" />
+                          <span>{away?.team.displayName}</span>
+                        </div>
+                        <span className="match-score">{m.status.type.state === 'pre' ? '-' : away?.score}</span>
+                      </div>
+                      {(() => {
+                        const v = getMatchVenue(comp);
+                        return v ? (
+                          <div className="match-venue">
+                            <span>{v.name}</span>
+                            {v.state && <><span className="match-venue-sep">·</span><span>{v.state}</span></>}
+                          </div>
+                        ) : null;
+                      })()}
                    </div>
                  );
                })}

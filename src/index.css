@@ -278,6 +278,20 @@ button {
   border-radius: 99px;
 }
 
+.hero-venue {
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  font-weight: 500;
+  margin-top: 4px;
+  margin-bottom: 8px;
+}
+
+.hero-venue-sep {
+  margin: 0 8px;
+  opacity: 0.5;
+}
+
 .no-live-matches {
   background: var(--glass-bg);
   backdrop-filter: blur(10px);
@@ -527,6 +541,22 @@ button {
 }
 .match-card.is-live .match-score {
   font-weight: 600;
+}
+
+.match-venue {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-light);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.match-venue-sep {
+  opacity: 0.4;
+  margin: 0 4px;
 }
 
 /* Match Columns (Upcoming) */
