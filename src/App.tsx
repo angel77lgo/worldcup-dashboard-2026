@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo } from 'react';
-import { RefreshCw } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { RefreshCw, Sun, Moon } from 'lucide-react';
 import Simulator from './Simulator';
 
 // --- TYPES ---
@@ -112,10 +112,14 @@ const ROUND_OF_32 = [
 ];
 
 const getInitialTab = (): 'partidos' | 'grupos' | 'eliminatorias' | 'estadisticas' | 'simulador' => {
-  const path = window.location.pathname;
-  if (path === '/simulator' || path === '/simulator/') return 'simulador';
   const hash = window.location.hash;
   if (hash === '#/simulator' || hash === '#simulator') return 'simulador';
+  if (hash === '#/grupos' || hash === '#grupos') return 'grupos';
+  if (hash === '#/eliminatorias' || hash === '#eliminatorias') return 'eliminatorias';
+  if (hash === '#/equipos' || hash === '#equipos') return 'estadisticas';
+
+  const path = window.location.pathname;
+  if (path === '/simulator' || path === '/simulator/') return 'simulador';
   if (path === '/grupos') return 'grupos';
   if (path === '/eliminatorias') return 'eliminatorias';
   if (path === '/equipos') return 'estadisticas';
@@ -124,23 +128,36 @@ const getInitialTab = (): 'partidos' | 'grupos' | 'eliminatorias' | 'estadistica
 
 function App() {
   const [activeTab, setActiveTab] = useState<'partidos' | 'grupos' | 'eliminatorias' | 'estadisticas' | 'simulador'>(getInitialTab);
+  const [darkMode, setDarkMode] = useState<boolean>(() => {
+    return localStorage.getItem('theme') === 'dark' ||
+      (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  });
   const [matches, setMatches] = useState<MatchEvent[]>([]);
   const [standings, setStandings] = useState<GroupStanding[]>([]);
   const [loading, setLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  
+
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    localStorage.setItem('theme', darkMode ? 'dark' : 'light');
+  }, [darkMode]);
+
   // Nuevo estado para los filtros de partidos (Anteriores, En Vivo, Próximos)
   const [matchFilter, setMatchFilter] = useState<'anteriores' | 'envivo' | 'proximos'>('proximos');
 
   const handleTabChange = (tab: 'partidos' | 'grupos' | 'eliminatorias' | 'estadisticas' | 'simulador') => {
     setActiveTab(tab);
-    let path = '/';
-    if (tab === 'simulador') path = '/simulator';
-    else if (tab === 'grupos') path = '/grupos';
-    else if (tab === 'eliminatorias') path = '/eliminatorias';
-    else if (tab === 'estadisticas') path = '/equipos';
-    window.history.pushState({}, '', path);
+    let hash = '';
+    if (tab === 'simulador') hash = '#/simulator';
+    else if (tab === 'grupos') hash = '#/grupos';
+    else if (tab === 'eliminatorias') hash = '#/eliminatorias';
+    else if (tab === 'estadisticas') hash = '#/equipos';
+    window.location.hash = hash;
   };
 
   const fetchData = async (silent = false) => {
@@ -164,22 +181,22 @@ function App() {
         if (standingsData.children) {
           setStandings(standingsData.children.map((child: any) => {
             const entries = child.standings?.entries || [];
-            
+
             // Sort explicitly by FIFA criteria: Points, Goal Difference, Goals For
             entries.sort((a: any, b: any) => {
               const getVal = (entry: any, name: string) => entry.stats.find((s: any) => s.name === name)?.value || 0;
               const ptsA = getVal(a, 'points');
               const ptsB = getVal(b, 'points');
               if (ptsA !== ptsB) return ptsB - ptsA;
-              
+
               const gdA = getVal(a, 'pointDifferential');
               const gdB = getVal(b, 'pointDifferential');
               if (gdA !== gdB) return gdB - gdA;
-              
+
               const gfA = getVal(a, 'pointsFor');
               const gfB = getVal(b, 'pointsFor');
               if (gfA !== gfB) return gfB - gfA;
-              
+
               return 0;
             });
 
@@ -203,20 +220,22 @@ function App() {
     fetchData();
     const interval = setInterval(() => fetchData(true), 60000);
 
-    const handlePopState = () => {
+    const handleNavigation = () => {
       setActiveTab(getInitialTab());
     };
-    window.addEventListener('popstate', handlePopState);
+    window.addEventListener('popstate', handleNavigation);
+    window.addEventListener('hashchange', handleNavigation);
 
     return () => {
       clearInterval(interval);
-      window.removeEventListener('popstate', handlePopState);
+      window.removeEventListener('popstate', handleNavigation);
+      window.removeEventListener('hashchange', handleNavigation);
     };
   }, []);
 
   const liveMatches = useMemo(() => matches.filter(m => m.status.type.state === 'in'), [matches]);
   const upcomingMatches = useMemo(() => matches.filter(m => m.status.type.state === 'pre'), [matches]);
-  
+
   const getStat = (entry: StandingEntry, statName: string): number => {
     const found = entry.stats.find(s => s.name === statName || s.type === statName);
     return found ? found.value : 0;
@@ -370,7 +389,7 @@ function App() {
   // Agrupar próximos partidos por fecha en columnas
   const groupedUpcomingMatches = useMemo(() => {
     if (matchFilter !== 'proximos' || activeTab !== 'partidos') return [];
-    
+
     const groups: Record<string, MatchEvent[]> = {};
     filteredMatches.forEach(m => {
       const localDate = new Date(m.date);
@@ -381,14 +400,14 @@ function App() {
       if (!groups[d]) groups[d] = [];
       groups[d].push(m);
     });
-    
+
     return Object.entries(groups).sort((a, b) => a[0].localeCompare(b[0]));
   }, [filteredMatches, matchFilter, activeTab]);
 
   // Render events/details for live matches
   const renderMatchDetails = (details?: MatchDetail[], homeId?: string, awayId?: string) => {
     if (!details || details.length === 0) return null;
-    
+
     return (
       <div className="match-timeline-details">
         {details.map((d, i) => {
@@ -399,7 +418,7 @@ function App() {
 
           const teamAlign = d.team.id === homeId ? 'left' : d.team.id === awayId ? 'right' : 'center';
           const player = d.athletesInvolved?.[0]?.shortName || d.type.text;
-          
+
           return (
             <div key={i} className={`timeline-event align-${teamAlign}`}>
               <div className="timeline-clock">{d.clock.displayValue}</div>
@@ -425,10 +444,15 @@ function App() {
     <div>
       <header className="header">
         <div className="header-title">FIFA 26</div>
-        <button className="refresh-btn" onClick={() => fetchData()} disabled={isRefreshing}>
-          <RefreshCw size={16} className={isRefreshing ? 'spinning' : ''} />
-          {isRefreshing ? 'Actualizando' : 'Actualizar'}
-        </button>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <button className="theme-toggle" onClick={() => setDarkMode(!darkMode)} aria-label="Toggle theme">
+            {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
+          <button className="refresh-btn" onClick={() => fetchData()} disabled={isRefreshing}>
+            <RefreshCw size={16} className={isRefreshing ? 'spinning' : ''} />
+            {isRefreshing ? 'Actualizando' : 'Actualizar'}
+          </button>
+        </div>
       </header>
 
       {/* HERO SECTION: LIVE MATCHES OR NEXT MATCH */}
@@ -452,8 +476,8 @@ function App() {
                       <div className="huge-name">{home?.team.displayName}</div>
                     </div>
                     <div className="huge-score-container">
-                       <div className="huge-score">{home?.score} - {away?.score}</div>
-                       <div className="huge-clock">{m.status.displayClock}</div>
+                      <div className="huge-score">{home?.score} - {away?.score}</div>
+                      <div className="huge-clock">{m.status.displayClock}</div>
                     </div>
                     <div className="huge-team">
                       <img src={away?.team.logo || ''} alt="" className="huge-logo" />
@@ -470,7 +494,7 @@ function App() {
                       </div>
                     ) : null;
                   })()}
-                  
+
                   {/* Detalles del partido: Goles, Tarjetas */}
                   {comp.details && comp.details.length > 0 && (
                     <div className="live-match-extended-info">
@@ -519,10 +543,10 @@ function App() {
                       <div className="huge-name">{home?.team.displayName}</div>
                     </div>
                     <div className="huge-score-container">
-                       <div className="huge-score" style={{ color: 'var(--text-secondary)' }}>VS</div>
-                       <div className="huge-clock">
-                         {new Date(m.date).toLocaleString('es-ES', { month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' })}
-                       </div>
+                      <div className="huge-score" style={{ color: 'var(--text-secondary)' }}>VS</div>
+                      <div className="huge-clock">
+                        {new Date(m.date).toLocaleString('es-ES', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                      </div>
                     </div>
                     <div className="huge-team">
                       <img src={away?.team.logo || ''} alt="" className="huge-logo" />
@@ -579,25 +603,25 @@ function App() {
       {/* SUB-FILTERS & SEARCH (For Matches Tab) */}
       {activeTab === 'partidos' && (
         <div className="controls-bar">
-           <div className="sub-filters">
-             <button className={`sub-filter-btn ${matchFilter === 'anteriores' ? 'active' : ''}`} onClick={() => setMatchFilter('anteriores')}>
-                Anteriores
-             </button>
-             <button className={`sub-filter-btn ${matchFilter === 'envivo' ? 'active' : ''}`} onClick={() => setMatchFilter('envivo')}>
-                En Vivo
-             </button>
-             <button className={`sub-filter-btn ${matchFilter === 'proximos' ? 'active' : ''}`} onClick={() => setMatchFilter('proximos')}>
-                Próximos
-             </button>
-           </div>
-           
-           <input 
-              type="text" 
-              placeholder="Buscar país..." 
-              className="input-flat search-input"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-           />
+          <div className="sub-filters">
+            <button className={`sub-filter-btn ${matchFilter === 'anteriores' ? 'active' : ''}`} onClick={() => setMatchFilter('anteriores')}>
+              Anteriores
+            </button>
+            <button className={`sub-filter-btn ${matchFilter === 'envivo' ? 'active' : ''}`} onClick={() => setMatchFilter('envivo')}>
+              En Vivo
+            </button>
+            <button className={`sub-filter-btn ${matchFilter === 'proximos' ? 'active' : ''}`} onClick={() => setMatchFilter('proximos')}>
+              Próximos
+            </button>
+          </div>
+
+          <input
+            type="text"
+            placeholder="Buscar país..."
+            className="input-flat search-input"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
         </div>
       )}
 
@@ -605,103 +629,103 @@ function App() {
       {activeTab === 'partidos' && (
         <div className="partidos-container">
           {matchFilter === 'proximos' ? (
-             // COLUMNS BY DATE FOR UPCOMING MATCHES
-             <div className="columns-container">
-                {groupedUpcomingMatches.map(([dateString, dateMatches]) => {
-                   const d = new Date(dateString + 'T12:00:00');
-                   return (
-                     <div key={dateString} className="date-column">
-                       <div className="date-column-header">
-                         {d.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}
-                       </div>
-                       <div className="date-column-content">
-                         {dateMatches.map(m => {
-                           const comp = m.competitions[0];
-                           const home = comp?.competitors.find(c => c.homeAway === 'home');
-                           const away = comp?.competitors.find(c => c.homeAway === 'away');
-                           return (
-                             <div key={m.id} className="match-card">
-                               <div className="match-header">
-                                 <span>{new Date(m.date).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })} hs</span>
-                               </div>
-                               <div className="match-team-row">
-                                 <div className="match-team-info">
-                                   <img src={home?.team.logo || ''} alt="" className="match-team-logo" />
-                                   <span>{home?.team.displayName}</span>
-                                 </div>
-                               </div>
-                                <div className="match-team-row">
-                                  <div className="match-team-info">
-                                    <img src={away?.team.logo || ''} alt="" className="match-team-logo" />
-                                    <span>{away?.team.displayName}</span>
-                                  </div>
-                                </div>
-                                {(() => {
-                                  const v = getMatchVenue(comp);
-                                  return v ? (
-                                    <div className="match-venue">
-                                      <span>{v.name}</span>
-                                      {v.state && <><span className="match-venue-sep">·</span><span>{v.state}</span></>}
-                                    </div>
-                                  ) : null;
-                                })()}
+            // COLUMNS BY DATE FOR UPCOMING MATCHES
+            <div className="columns-container">
+              {groupedUpcomingMatches.map(([dateString, dateMatches]) => {
+                const d = new Date(dateString + 'T12:00:00');
+                return (
+                  <div key={dateString} className="date-column">
+                    <div className="date-column-header">
+                      {d.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}
+                    </div>
+                    <div className="date-column-content">
+                      {dateMatches.map(m => {
+                        const comp = m.competitions[0];
+                        const home = comp?.competitors.find(c => c.homeAway === 'home');
+                        const away = comp?.competitors.find(c => c.homeAway === 'away');
+                        return (
+                          <div key={m.id} className="match-card">
+                            <div className="match-header">
+                              <span>{new Date(m.date).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })} hs</span>
+                            </div>
+                            <div className="match-team-row">
+                              <div className="match-team-info">
+                                <img src={home?.team.logo || ''} alt="" className="match-team-logo" />
+                                <span>{home?.team.displayName}</span>
                               </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    );
-                 })}
-                 {groupedUpcomingMatches.length === 0 && (
-                    <div className="empty-state">No hay próximos partidos programados.</div>
-                 )}
-              </div>
-           ) : (
-              // STANDARD GRID FOR OTHERS (LIVE, PAST)
-              <div className="matches-grid">
-                {filteredMatches.map(m => {
-                  const comp = m.competitions[0];
-                  const home = comp?.competitors.find(c => c.homeAway === 'home');
-                  const away = comp?.competitors.find(c => c.homeAway === 'away');
-                  const isLive = m.status.type.state === 'in';
-                  return (
-                    <div key={m.id} className={`match-card ${isLive ? 'is-live' : ''}`}>
-                      <div className="match-header">
-                        <span>{new Date(m.date).toLocaleDateString('es-ES', { month: 'short', day: 'numeric' })}</span>
-                        <span style={{ color: isLive ? 'var(--accent-live)' : 'inherit' }}>
-                          {isLive ? m.status.displayClock : m.status.type.shortDetail}
-                        </span>
-                      </div>
-                      <div className="match-team-row">
-                        <div className="match-team-info">
-                          <img src={home?.team.logo || ''} alt="" className="match-team-logo" />
-                          <span>{home?.team.displayName}</span>
-                        </div>
-                        <span className="match-score">{m.status.type.state === 'pre' ? '-' : home?.score}</span>
-                      </div>
-                      <div className="match-team-row">
-                        <div className="match-team-info">
-                          <img src={away?.team.logo || ''} alt="" className="match-team-logo" />
-                          <span>{away?.team.displayName}</span>
-                        </div>
-                        <span className="match-score">{m.status.type.state === 'pre' ? '-' : away?.score}</span>
-                      </div>
-                      {(() => {
-                        const v = getMatchVenue(comp);
-                        return v ? (
-                          <div className="match-venue">
-                            <span>{v.name}</span>
-                            {v.state && <><span className="match-venue-sep">·</span><span>{v.state}</span></>}
+                            </div>
+                            <div className="match-team-row">
+                              <div className="match-team-info">
+                                <img src={away?.team.logo || ''} alt="" className="match-team-logo" />
+                                <span>{away?.team.displayName}</span>
+                              </div>
+                            </div>
+                            {(() => {
+                              const v = getMatchVenue(comp);
+                              return v ? (
+                                <div className="match-venue">
+                                  <span>{v.name}</span>
+                                  {v.state && <><span className="match-venue-sep">·</span><span>{v.state}</span></>}
+                                </div>
+                              ) : null;
+                            })()}
                           </div>
-                        ) : null;
-                      })()}
-                   </div>
-                 );
-               })}
-               {filteredMatches.length === 0 && (
-                 <div className="empty-state">No se encontraron partidos.</div>
-               )}
-             </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+              {groupedUpcomingMatches.length === 0 && (
+                <div className="empty-state">No hay próximos partidos programados.</div>
+              )}
+            </div>
+          ) : (
+            // STANDARD GRID FOR OTHERS (LIVE, PAST)
+            <div className="matches-grid">
+              {filteredMatches.map(m => {
+                const comp = m.competitions[0];
+                const home = comp?.competitors.find(c => c.homeAway === 'home');
+                const away = comp?.competitors.find(c => c.homeAway === 'away');
+                const isLive = m.status.type.state === 'in';
+                return (
+                  <div key={m.id} className={`match-card ${isLive ? 'is-live' : ''}`}>
+                    <div className="match-header">
+                      <span>{new Date(m.date).toLocaleDateString('es-ES', { month: 'short', day: 'numeric' })}</span>
+                      <span style={{ color: isLive ? 'var(--accent-live)' : 'inherit' }}>
+                        {isLive ? m.status.displayClock : m.status.type.shortDetail}
+                      </span>
+                    </div>
+                    <div className="match-team-row">
+                      <div className="match-team-info">
+                        <img src={home?.team.logo || ''} alt="" className="match-team-logo" />
+                        <span>{home?.team.displayName}</span>
+                      </div>
+                      <span className="match-score">{m.status.type.state === 'pre' ? '-' : home?.score}</span>
+                    </div>
+                    <div className="match-team-row">
+                      <div className="match-team-info">
+                        <img src={away?.team.logo || ''} alt="" className="match-team-logo" />
+                        <span>{away?.team.displayName}</span>
+                      </div>
+                      <span className="match-score">{m.status.type.state === 'pre' ? '-' : away?.score}</span>
+                    </div>
+                    {(() => {
+                      const v = getMatchVenue(comp);
+                      return v ? (
+                        <div className="match-venue">
+                          <span>{v.name}</span>
+                          {v.state && <><span className="match-venue-sep">·</span><span>{v.state}</span></>}
+                        </div>
+                      ) : null;
+                    })()}
+                  </div>
+                );
+              })}
+              {filteredMatches.length === 0 && (
+                <div className="empty-state">No se encontraron partidos.</div>
+              )}
+            </div>
           )}
         </div>
       )}
@@ -755,6 +779,77 @@ function App() {
         // Helper: resolve a team for any bracket slot (group slot or winner-of slot)
         const getMatchBySlug = (slug: string) => matches.filter(m => m.season.slug === slug);
 
+        // Map ESPN API match to official FIFA World Cup 2026 match number
+        const getESPNMatchNum = (m: MatchEvent): number => {
+          if (m.season.slug === 'group-stage') return 0;
+          const directMatch = m.name?.match(/Match\s+(\d+)/i) || m.name?.match(/\bM(\d+)\b/i);
+          if (directMatch) return parseInt(directMatch[1], 10);
+
+          const homeName = m.competitions[0]?.competitors?.find(c => c.homeAway === 'home')?.team?.displayName || '';
+          const awayName = m.competitions[0]?.competitors?.find(c => c.homeAway === 'away')?.team?.displayName || '';
+
+          if (m.season.slug === 'round-of-32') {
+            const hSlot = parsePlaceholderToSlot(homeName);
+            const aSlot = parsePlaceholderToSlot(awayName);
+            const found = ROUND_OF_32.find(def =>
+              (def.home === hSlot && def.away === aSlot) || (def.home === aSlot && def.away === hSlot)
+            );
+            if (found) return found.match;
+          }
+
+          if (m.season.slug === 'round-of-16') {
+            const nums = [...m.name.matchAll(/\d+/g)].map(x => parseInt(x[0], 10));
+            const eventIndices = nums.filter(n => n !== 32);
+            if (eventIndices.length === 2) {
+              const sortedIndices = [...eventIndices].sort((a, b) => a - b);
+              const key = sortedIndices.join(',');
+              const mapping: Record<string, number> = {
+                '3,6': 89,
+                '1,4': 90,
+                '2,5': 91,
+                '7,8': 92,
+                '11,12': 93,
+                '9,10': 94,
+                '14,15': 95,
+                '13,16': 96
+              };
+              if (mapping[key]) return mapping[key];
+            }
+          }
+
+          if (m.season.slug === 'quarterfinals') {
+            const nums = [...m.name.matchAll(/\d+/g)].map(x => parseInt(x[0], 10));
+            const r16WinnerNums = nums.filter(n => n !== 16);
+            if (r16WinnerNums.length === 2) {
+              const sorted = [...r16WinnerNums].sort((a, b) => a - b);
+              const key = sorted.join(',');
+              const mapping: Record<string, number> = {
+                '1,2': 97,
+                '5,6': 98,
+                '3,4': 99,
+                '7,8': 100
+              };
+              if (mapping[key]) return mapping[key];
+            }
+          }
+
+          if (m.season.slug === 'semifinals') {
+            const nums = [...m.name.matchAll(/\d+/g)].map(x => parseInt(x[0], 10));
+            if (nums.length === 2) {
+              const sorted = [...nums].sort((a, b) => a - b);
+              const key = sorted.join(',');
+              const mapping: Record<string, number> = {
+                '1,2': 101,
+                '3,4': 102
+              };
+              if (mapping[key]) return mapping[key];
+            }
+          }
+
+          if (m.season.slug === '3rd-place-match') return 103;
+          if (m.season.slug === 'final') return 104;
+          return 0;
+        };
 
         // Find the ESPN round-of-32 match for our bracket slot
         const findR32Match = (matchDef: { home: string; away: string }) =>
@@ -837,7 +932,7 @@ function App() {
                     <span style={{
                       fontSize: '0.82rem',
                       fontWeight: row.win ? 700 : 400,
-                      color: row.win ? 'var(--text-primary)' : 'var(--text-primary)',
+                      color: 'var(--text-primary)',
                       whiteSpace: 'nowrap',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis'
@@ -863,12 +958,10 @@ function App() {
         };
 
         // Build bracket column helper
-        const RoundColumn = ({ title, children }: { title: string; children: React.ReactNode }) => (
+        const RoundColumn = ({ title, flexWeight = 1, children }: { title: string; flexWeight?: number; children: React.ReactNode }) => (
           <div style={{
             display: 'flex',
             flexDirection: 'column',
-            justifyContent: 'space-around',
-            gap: '12px',
             minWidth: '210px'
           }}>
             <div style={{
@@ -880,16 +973,30 @@ function App() {
               letterSpacing: '0.06em',
               borderBottom: '2px solid var(--border-light)',
               paddingBottom: '8px',
-              marginBottom: '4px'
+              marginBottom: '16px'
             }}>
               {title}
             </div>
-            {children}
+            <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+              {React.Children.toArray(children).filter(Boolean).map((child, i) => (
+                <div key={i} style={{ flex: flexWeight, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '6px 0' }}>
+                  {child}
+                </div>
+              ))}
+            </div>
           </div>
         );
 
-        // Build R32 cards from our ROUND_OF_32 definitions
-        const r32Cards = ROUND_OF_32.map(matchDef => {
+        // Visual order for single left-to-right bracket layout
+        const R32_ORDER = [75, 78, 73, 76, 83, 84, 81, 82, 74, 77, 79, 80, 86, 87, 85, 88];
+        const R16_ORDER = [89, 90, 93, 94, 91, 92, 95, 96];
+        const QF_ORDER = [97, 98, 99, 100];
+        const SF_ORDER = [101, 102];
+
+        // Build R32 cards in visual tree order
+        const r32Cards = R32_ORDER.map(matchNum => {
+          const matchDef = ROUND_OF_32.find(d => d.match === matchNum);
+          if (!matchDef) return null;
           const espnMatch = findR32Match(matchDef);
           const comp = espnMatch?.competitions[0];
           const home = comp?.competitors?.find(c => c.homeAway === 'home');
@@ -898,7 +1005,6 @@ function App() {
           const isStarted = state === 'in' || state === 'post';
           const homeTeam = resolveRealSlot(matchDef.home);
           const awayTeam = resolveRealSlot(matchDef.away);
-          // If already played, show real winner's team
           const homeDisplay = (isStarted && home) ? { name: home.team.displayName, logo: home.team.logo } : homeTeam;
           const awayDisplay = (isStarted && away) ? { name: away.team.displayName, logo: away.team.logo } : awayTeam;
           return (
@@ -917,18 +1023,21 @@ function App() {
           );
         });
 
-        // Build cards for later rounds using ESPN data
-        const buildRoundCards = (slug: string) =>
-          getMatchBySlug(slug).map(m => {
+        // Build cards for later rounds using ESPN data and correct tree ordering
+        const buildRoundCards = (slug: string, orderArray: number[]) => {
+          const roundMatches = getMatchBySlug(slug);
+          return orderArray.map(matchNum => {
+            const m = roundMatches.find(x => getESPNMatchNum(x) === matchNum);
+            if (!m) return <BracketCard key={matchNum} matchNum={matchNum} homeTeam={null} awayTeam={null} />;
+
             const comp = m.competitions[0];
             const home = comp?.competitors?.find(c => c.homeAway === 'home');
             const away = comp?.competitors?.find(c => c.homeAway === 'away');
             const state = m.status.type.state;
-            const matchNum = parseInt(m.name?.match(/\d+/)?.[0] || '0');
             return (
               <BracketCard
                 key={m.id}
-                matchNum={matchNum || 0}
+                matchNum={matchNum}
                 homeTeam={home ? { name: home.team.displayName, logo: home.team.logo } : null}
                 awayTeam={away ? { name: away.team.displayName, logo: away.team.logo } : null}
                 homeScore={home?.score}
@@ -940,6 +1049,7 @@ function App() {
               />
             );
           });
+        };
 
         return (
           <div style={{ overflowX: 'auto', padding: '0 0 40px' }}>
@@ -963,30 +1073,15 @@ function App() {
               minHeight: '900px',
               alignItems: 'stretch'
             }}>
-              <RoundColumn title="16vos de Final">{r32Cards}</RoundColumn>
-              <RoundColumn title="8vos de Final">
-                {buildRoundCards('round-of-16').length > 0
-                  ? buildRoundCards('round-of-16')
-                  : Array.from({ length: 8 }, (_, i) => (
-                    <BracketCard key={i} matchNum={89 + i} homeTeam={null} awayTeam={null} />
-                  ))
-                }
+              <RoundColumn title="16vos de Final" flexWeight={1}>{r32Cards}</RoundColumn>
+              <RoundColumn title="8vos de Final" flexWeight={2}>
+                {buildRoundCards('round-of-16', R16_ORDER)}
               </RoundColumn>
-              <RoundColumn title="Cuartos de Final">
-                {buildRoundCards('quarterfinals').length > 0
-                  ? buildRoundCards('quarterfinals')
-                  : Array.from({ length: 4 }, (_, i) => (
-                    <BracketCard key={i} matchNum={97 + i} homeTeam={null} awayTeam={null} />
-                  ))
-                }
+              <RoundColumn title="Cuartos de Final" flexWeight={4}>
+                {buildRoundCards('quarterfinals', QF_ORDER)}
               </RoundColumn>
-              <RoundColumn title="Semifinales">
-                {buildRoundCards('semifinals').length > 0
-                  ? buildRoundCards('semifinals')
-                  : Array.from({ length: 2 }, (_, i) => (
-                    <BracketCard key={i} matchNum={101 + i} homeTeam={null} awayTeam={null} />
-                  ))
-                }
+              <RoundColumn title="Semifinales" flexWeight={8}>
+                {buildRoundCards('semifinals', SF_ORDER)}
               </RoundColumn>
               <div style={{
                 display: 'flex',
@@ -999,19 +1094,13 @@ function App() {
                   <div style={{ textAlign: 'center', fontWeight: 700, fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em', borderBottom: '2px solid var(--border-light)', paddingBottom: '8px', marginBottom: '12px' }}>
                     3er Lugar
                   </div>
-                  {buildRoundCards('3rd-place-match').length > 0
-                    ? buildRoundCards('3rd-place-match')
-                    : <BracketCard matchNum={103} homeTeam={null} awayTeam={null} />
-                  }
+                  {buildRoundCards('3rd-place-match', [103])}
                 </div>
                 <div>
                   <div style={{ textAlign: 'center', fontWeight: 700, fontSize: '0.8rem', color: 'var(--accent-primary)', textTransform: 'uppercase', letterSpacing: '0.06em', borderBottom: '2px solid var(--accent-primary)', paddingBottom: '8px', marginBottom: '12px' }}>
                     🏆 Gran Final
                   </div>
-                  {buildRoundCards('final').length > 0
-                    ? buildRoundCards('final')
-                    : <BracketCard matchNum={104} homeTeam={null} awayTeam={null} />
-                  }
+                  {buildRoundCards('final', [104])}
                 </div>
               </div>
             </div>
@@ -1022,9 +1111,9 @@ function App() {
 
       {activeTab === 'estadisticas' && (
         <>
-          <input 
-            type="text" 
-            placeholder="Buscar equipo..." 
+          <input
+            type="text"
+            placeholder="Buscar equipo..."
             className="input-flat"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}

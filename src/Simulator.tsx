@@ -24,21 +24,21 @@ const ROUND_OF_32: Array<{ match: number; home: string; away: string }> = [
 
 // Estructura de 8vos (Round of 16) - ganadores de los cruces anteriores
 const ROUND_OF_16 = [
-  { match: 89, home: 'W73', away: 'W74' },
-  { match: 90, home: 'W75', away: 'W76' },
-  { match: 91, home: 'W77', away: 'W78' },
+  { match: 89, home: 'W74', away: 'W77' },
+  { match: 90, home: 'W73', away: 'W75' },
+  { match: 91, home: 'W76', away: 'W78' },
   { match: 92, home: 'W79', away: 'W80' },
-  { match: 93, home: 'W81', away: 'W82' },
-  { match: 94, home: 'W83', away: 'W84' },
-  { match: 95, home: 'W85', away: 'W86' },
-  { match: 96, home: 'W87', away: 'W88' },
+  { match: 93, home: 'W83', away: 'W84' },
+  { match: 94, home: 'W81', away: 'W82' },
+  { match: 95, home: 'W86', away: 'W88' },
+  { match: 96, home: 'W85', away: 'W87' },
 ];
 
 // Cuartos de final
 const QUARTERFINALS = [
   { match: 97, home: 'W89', away: 'W90' },
-  { match: 98, home: 'W91', away: 'W92' },
-  { match: 99, home: 'W93', away: 'W94' },
+  { match: 98, home: 'W93', away: 'W94' },
+  { match: 99, home: 'W91', away: 'W92' },
   { match: 100, home: 'W95', away: 'W96' },
 ];
 
@@ -301,7 +301,7 @@ export default function Simulator({ matches, initialStandings }: { matches: any[
   // ---------- ESTILOS REUTILIZABLES ----------
   const cardStyle: React.CSSProperties = { background: 'var(--card-bg)', border: '1px solid var(--border-light)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-md)', overflow: 'hidden' };
 
-  const renderKnockoutMatch = (matchDef: { match: number; home: string; away: string }, label?: string) => {
+  const renderKnockoutMatch = (matchDef: { match: number; home: string; away: string }, label?: string, reverse?: boolean) => {
     const homeTeam = resolveSlot(matchDef.home);
     const awayTeam = resolveSlot(matchDef.away);
     const score = knockoutScores[matchDef.match];
@@ -314,8 +314,8 @@ export default function Simulator({ matches, initialStandings }: { matches: any[
     const isAwayWinner = isFinished && aNum > hNum;
 
     return (
-      <div style={{ background: 'var(--card-bg)', border: '1px solid var(--border-light)', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-sm)', overflow: 'hidden', minWidth: '220px', position: 'relative' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-color)', padding: '5px 12px', borderBottom: '1px solid var(--border-light)' }}>
+      <div style={{ background: 'var(--card-bg)', border: '1px solid var(--border-light)', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-sm)', overflow: 'hidden', minWidth: '190px', position: 'relative' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', flexDirection: reverse ? 'row-reverse' : 'row', alignItems: 'center', background: 'var(--bg-color)', padding: '5px 12px', borderBottom: '1px solid var(--border-light)' }}>
           <span style={{ fontSize: '0.68rem', fontWeight: 800, color: 'var(--text-secondary)' }}>M{matchDef.match}</span>
           {label && <span style={{ fontSize: '0.62rem', fontWeight: 800, color: 'var(--accent-cyan)', textTransform: 'uppercase' }}>{label}</span>}
         </div>
@@ -323,10 +323,10 @@ export default function Simulator({ matches, initialStandings }: { matches: any[
           { team: homeTeam, slotKey: matchDef.home, scoreKey: 'home' as const, isWinner: isHomeWinner },
           { team: awayTeam, slotKey: matchDef.away, scoreKey: 'away' as const, isWinner: isAwayWinner }
         ].map(({ team, slotKey, scoreKey, isWinner }) => (
-          <div key={scoreKey} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', borderBottom: scoreKey === 'home' ? '1px solid var(--border-light)' : 'none', background: isWinner ? 'rgba(14, 165, 233, 0.06)' : 'transparent', transition: 'background-color 0.2s ease' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
+          <div key={scoreKey} style={{ display: 'flex', flexDirection: reverse ? 'row-reverse' : 'row', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', borderBottom: scoreKey === 'home' ? '1px solid var(--border-light)' : 'none', background: isWinner ? 'rgba(14, 165, 233, 0.06)' : 'transparent', transition: 'background-color 0.2s ease' }}>
+            <div style={{ display: 'flex', flexDirection: reverse ? 'row-reverse' : 'row', alignItems: 'center', gap: '8px', flex: 1 }}>
               {team?.logo && <img src={team.logo} alt="" style={{ width: '20px' }} />}
-              <span style={{ fontWeight: isWinner ? 750 : 600, fontSize: '0.85rem', color: team ? 'var(--text-primary)' : 'var(--text-secondary)', fontStyle: team ? 'normal' : 'italic' }}>
+              <span style={{ fontWeight: isWinner ? 750 : 600, fontSize: '0.85rem', color: team ? 'var(--text-primary)' : 'var(--text-secondary)', fontStyle: team ? 'normal' : 'italic', textAlign: reverse ? 'right' : 'left' }}>
                 {team ? (team.abbr || team.name) : slotKey}
               </span>
             </div>
@@ -334,7 +334,7 @@ export default function Simulator({ matches, initialStandings }: { matches: any[
             {isReady && (
               <input
                 type="text" inputMode="numeric" pattern="[0-9]*" maxLength={2}
-                style={{ width: '34px', padding: '4px', textAlign: 'center', fontWeight: 700, border: '1.5px solid var(--accent-cyan)', borderRadius: '4px', outline: 'none', background: 'var(--accent-cyan-light)', color: 'var(--accent-cyan)', fontFamily: 'inherit', fontSize: '0.9rem' }}
+                style={{ width: '34px', padding: '4px', textAlign: 'center', fontWeight: 700, border: '1.5px solid var(--accent-primary)', borderRadius: '4px', outline: 'none', background: 'var(--accent-primary-light)', color: 'var(--accent-primary)', fontFamily: 'inherit', fontSize: '0.9rem', marginLeft: reverse ? '0' : '10px', marginRight: reverse ? '10px' : '0' }}
                 value={score?.[scoreKey] ?? ''}
                 onChange={(e) => handleKnockoutChange(matchDef.match, scoreKey, e.target.value)}
               />
@@ -497,12 +497,12 @@ export default function Simulator({ matches, initialStandings }: { matches: any[
                               ) : (
                                 <>
                                   <input type="text" inputMode="numeric" pattern="[0-9]*" maxLength={2}
-                                    style={{ width: '36px', padding: '5px', textAlign: 'center', fontWeight: 700, border: '1.5px solid var(--accent-cyan)', borderRadius: '5px', outline: 'none', background: 'var(--accent-cyan-light)', color: 'var(--accent-cyan)', fontFamily: 'inherit' }}
+                                    style={{ width: '36px', padding: '5px', textAlign: 'center', fontWeight: 700, border: '1.5px solid var(--accent-primary)', borderRadius: '5px', outline: 'none', background: 'var(--accent-primary-light)', color: 'var(--accent-primary)', fontFamily: 'inherit' }}
                                     value={simScores[m.id]?.home ?? ''}
                                     onChange={(e) => handleScoreChange(m.id, 'home', e.target.value)} />
-                                  <Edit3 size={11} color="var(--accent-cyan)" />
+                                  <Edit3 size={11} color="var(--accent-primary)" />
                                   <input type="text" inputMode="numeric" pattern="[0-9]*" maxLength={2}
-                                    style={{ width: '36px', padding: '5px', textAlign: 'center', fontWeight: 700, border: '1.5px solid var(--accent-cyan)', borderRadius: '5px', outline: 'none', background: 'var(--accent-cyan-light)', color: 'var(--accent-cyan)', fontFamily: 'inherit' }}
+                                    style={{ width: '36px', padding: '5px', textAlign: 'center', fontWeight: 700, border: '1.5px solid var(--accent-primary)', borderRadius: '5px', outline: 'none', background: 'var(--accent-primary-light)', color: 'var(--accent-primary)', fontFamily: 'inherit' }}
                                     value={simScores[m.id]?.away ?? ''}
                                     onChange={(e) => handleScoreChange(m.id, 'away', e.target.value)} />
                                 </>
@@ -568,72 +568,98 @@ export default function Simulator({ matches, initialStandings }: { matches: any[
         </div>
       )}
 
-      {groupStageComplete && (
-        <div style={{ marginTop: '40px' }}>
-          <SectionTitle title="Fase Eliminatoria Simulada" subtitle="Visualiza el camino completo del torneo hacia el trofeo. Desplázate horizontalmente para ver todas las llaves." />
-          
-          <div style={{ 
-            display: 'flex', 
-            gap: '30px', 
-            overflowX: 'auto', 
-            padding: '30px 20px', 
-            background: 'var(--card-bg)', 
-            border: '1px solid var(--border-light)', 
-            borderRadius: 'var(--radius-lg)',
-            boxShadow: 'var(--shadow-md)',
-            minHeight: '1100px'
-          }}>
-            {/* 16AVOS */}
-            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-around', gap: '10px', minWidth: '220px' }}>
-              <div style={{ textAlign: 'center', fontWeight: 700, fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '2px solid var(--border-light)', paddingBottom: '8px', marginBottom: '10px' }}>
-                16avos de Final
-              </div>
-              {ROUND_OF_32.map(m => <div key={m.match}>{renderKnockoutMatch(m)}</div>)}
-            </div>
+      {groupStageComplete && (() => {
+        const getMatchByNum = (matchNum: number) => {
+          const all = [...ROUND_OF_32, ...ROUND_OF_16, ...QUARTERFINALS, ...SEMIFINALS, ...FINAL, ...THIRD];
+          return all.find(m => m.match === matchNum)!;
+        };
 
-            {/* 8VOS */}
-            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-around', gap: '10px', minWidth: '220px' }}>
-              <div style={{ textAlign: 'center', fontWeight: 700, fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '2px solid var(--border-light)', paddingBottom: '8px', marginBottom: '10px' }}>
-                Octavos de Final
-              </div>
-              {ROUND_OF_16.map(m => <div key={m.match}>{renderKnockoutMatch(m)}</div>)}
-            </div>
+        const leftR32 = [74, 77, 73, 75, 83, 84, 81, 82].map(getMatchByNum);
+        const leftR16 = [89, 90, 93, 94].map(getMatchByNum);
+        const leftQF = [97, 98].map(getMatchByNum);
+        const leftSF = [101].map(getMatchByNum);
 
-            {/* CUARTOS */}
-            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-around', gap: '10px', minWidth: '220px' }}>
-              <div style={{ textAlign: 'center', fontWeight: 700, fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '2px solid var(--border-light)', paddingBottom: '8px', marginBottom: '10px' }}>
-                Cuartos de Final
-              </div>
-              {QUARTERFINALS.map(m => <div key={m.match}>{renderKnockoutMatch(m)}</div>)}
-            </div>
+        const rightSF = [102].map(getMatchByNum);
+        const rightQF = [99, 100].map(getMatchByNum);
+        const rightR16 = [91, 92, 95, 96].map(getMatchByNum);
+        const rightR32 = [76, 78, 79, 80, 86, 88, 85, 87].map(getMatchByNum);
 
-            {/* SEMIS */}
-            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-around', gap: '10px', minWidth: '220px' }}>
-              <div style={{ textAlign: 'center', fontWeight: 700, fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '2px solid var(--border-light)', paddingBottom: '8px', marginBottom: '10px' }}>
-                Semifinales
-              </div>
-              {SEMIFINALS.map(m => <div key={m.match}>{renderKnockoutMatch(m)}</div>)}
-            </div>
-
-            {/* FINALES */}
-            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '60px', minWidth: '240px' }}>
-              <div>
-                <div style={{ textAlign: 'center', fontWeight: 700, fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '2px solid var(--border-light)', paddingBottom: '8px', marginBottom: '12px' }}>
-                  Tercer Puesto
+        return (
+          <div style={{ marginTop: '40px' }}>
+            <SectionTitle title="Fase Eliminatoria Simulada" subtitle="Visualiza el camino completo del torneo hacia el trofeo. Desplázate horizontalmente para ver todas las llaves." />
+            
+            <div style={{ 
+              display: 'flex', 
+              justifyContent: 'flex-start',
+              gap: '15px', 
+              overflowX: 'auto', 
+              padding: '30px 20px', 
+              background: 'var(--card-bg)', 
+              border: '1px solid var(--border-light)', 
+              borderRadius: 'var(--radius-lg)',
+              boxShadow: 'var(--shadow-md)',
+              minHeight: '1100px'
+            }}>
+              {/* LADO IZQUIERDO */}
+              <div style={{ display: 'flex', gap: '15px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-around', gap: '8px', minWidth: '190px' }}>
+                  <div style={{ textAlign: 'center', fontWeight: 700, fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '2px solid var(--border-light)', paddingBottom: '8px', marginBottom: '10px' }}>16avos</div>
+                  {leftR32.map(m => <div key={m.match}>{renderKnockoutMatch(m)}</div>)}
                 </div>
-                {THIRD.map(m => <div key={m.match}>{renderKnockoutMatch(m, '3° Lugar')}</div>)}
-              </div>
-              
-              <div>
-                <div style={{ textAlign: 'center', fontWeight: 700, fontSize: '0.85rem', color: 'var(--accent-cyan)', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '2px solid var(--accent-cyan)', paddingBottom: '8px', marginBottom: '12px' }}>
-                  🏆 Gran Final
+                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-around', gap: '8px', minWidth: '190px' }}>
+                  <div style={{ textAlign: 'center', fontWeight: 700, fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '2px solid var(--border-light)', paddingBottom: '8px', marginBottom: '10px' }}>Octavos</div>
+                  {leftR16.map(m => <div key={m.match}>{renderKnockoutMatch(m)}</div>)}
                 </div>
-                {FINAL.map(m => <div key={m.match}>{renderKnockoutMatch(m, 'Final')}</div>)}
+                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-around', gap: '8px', minWidth: '190px' }}>
+                  <div style={{ textAlign: 'center', fontWeight: 700, fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '2px solid var(--border-light)', paddingBottom: '8px', marginBottom: '10px' }}>Cuartos</div>
+                  {leftQF.map(m => <div key={m.match}>{renderKnockoutMatch(m)}</div>)}
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-around', gap: '8px', minWidth: '190px' }}>
+                  <div style={{ textAlign: 'center', fontWeight: 700, fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '2px solid var(--border-light)', paddingBottom: '8px', marginBottom: '10px' }}>Semis</div>
+                  {leftSF.map(m => <div key={m.match}>{renderKnockoutMatch(m)}</div>)}
+                </div>
+              </div>
+
+              {/* CENTRO: FINAL Y TERCER PUESTO */}
+              <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '60px', minWidth: '220px', margin: '0 10px' }}>
+                <div>
+                  <div style={{ textAlign: 'center', fontWeight: 700, fontSize: '0.85rem', color: 'var(--accent-primary)', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '2px solid var(--accent-primary)', paddingBottom: '8px', marginBottom: '16px' }}>
+                    🏆 Gran Final
+                  </div>
+                  {FINAL.map(m => <div key={m.match}>{renderKnockoutMatch(m, 'Final')}</div>)}
+                </div>
+                
+                <div>
+                  <div style={{ textAlign: 'center', fontWeight: 700, fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '2px solid var(--border-light)', paddingBottom: '8px', marginBottom: '16px' }}>
+                    Tercer Puesto
+                  </div>
+                  {THIRD.map(m => <div key={m.match}>{renderKnockoutMatch(m, '3° Lugar')}</div>)}
+                </div>
+              </div>
+
+              {/* LADO DERECHO */}
+              <div style={{ display: 'flex', gap: '15px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-around', gap: '8px', minWidth: '190px' }}>
+                  <div style={{ textAlign: 'center', fontWeight: 700, fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '2px solid var(--border-light)', paddingBottom: '8px', marginBottom: '10px' }}>Semis</div>
+                  {rightSF.map(m => <div key={m.match}>{renderKnockoutMatch(m, undefined, true)}</div>)}
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-around', gap: '8px', minWidth: '190px' }}>
+                  <div style={{ textAlign: 'center', fontWeight: 700, fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '2px solid var(--border-light)', paddingBottom: '8px', marginBottom: '10px' }}>Cuartos</div>
+                  {rightQF.map(m => <div key={m.match}>{renderKnockoutMatch(m, undefined, true)}</div>)}
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-around', gap: '8px', minWidth: '190px' }}>
+                  <div style={{ textAlign: 'center', fontWeight: 700, fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '2px solid var(--border-light)', paddingBottom: '8px', marginBottom: '10px' }}>Octavos</div>
+                  {rightR16.map(m => <div key={m.match}>{renderKnockoutMatch(m, undefined, true)}</div>)}
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-around', gap: '8px', minWidth: '190px' }}>
+                  <div style={{ textAlign: 'center', fontWeight: 700, fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '2px solid var(--border-light)', paddingBottom: '8px', marginBottom: '10px' }}>16avos</div>
+                  {rightR32.map(m => <div key={m.match}>{renderKnockoutMatch(m, undefined, true)}</div>)}
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
     </div>
   );
 }
