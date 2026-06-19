@@ -1,4 +1,3 @@
-import { RefreshCw, Sun, Moon } from 'lucide-react';
 import type { TabType } from '../../hooks/useRouting';
 
 interface HeaderProps {
@@ -17,11 +16,11 @@ export function Header({ darkMode, setDarkMode, isRefreshing, fetchData, activeT
         <div className="header-title">FIFA 26</div>
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
           <button className="theme-toggle" onClick={() => setDarkMode(!darkMode)} aria-label="Toggle theme">
-            {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+            {darkMode ? '☀️' : '🌙'}
           </button>
           <button className="refresh-btn" onClick={() => fetchData()} disabled={isRefreshing}>
-            <RefreshCw size={16} className={isRefreshing ? 'spinning' : ''} />
-            {isRefreshing ? 'Actualizando' : 'Actualizar'}
+            <span className={isRefreshing ? 'spinning' : ''} style={{ display: 'inline-block' }}>🔄</span>
+            {isRefreshing ? ' Actualizando' : ' Actualizar'}
           </button>
         </div>
       </header>

@@ -6,6 +6,13 @@ export const getStat = (entry: StandingEntry, statName: string): number => {
   return found ? found.value : 0;
 };
 
+const sortEspnEntries = (a: any, b: any) => {
+  const getVal = (entry: any, name: string) => entry.stats.find((s: any) => s.name === name || s.type === name)?.value || 0;
+  return (getVal(b, 'points') - getVal(a, 'points')) || 
+         (getVal(b, 'pointDifferential') - getVal(a, 'pointDifferential')) || 
+         (getVal(b, 'pointsFor') - getVal(a, 'pointsFor')) || 0;
+};
+
 export function useWorldCupData() {
   const [matches, setMatches] = useState<MatchEvent[]>([]);
   const [standings, setStandings] = useState<GroupStanding[]>([]);
@@ -34,22 +41,7 @@ export function useWorldCupData() {
           setStandings(standingsData.children.map((child: any) => {
             const entries = child.standings?.entries || [];
 
-            entries.sort((a: any, b: any) => {
-              const getVal = (entry: any, name: string) => entry.stats.find((s: any) => s.name === name)?.value || 0;
-              const ptsA = getVal(a, 'points');
-              const ptsB = getVal(b, 'points');
-              if (ptsA !== ptsB) return ptsB - ptsA;
-
-              const gdA = getVal(a, 'pointDifferential');
-              const gdB = getVal(b, 'pointDifferential');
-              if (gdA !== gdB) return gdB - gdA;
-
-              const gfA = getVal(a, 'pointsFor');
-              const gfB = getVal(b, 'pointsFor');
-              if (gfA !== gfB) return gfB - gfA;
-
-              return 0;
-            });
+            entries.sort(sortEspnEntries);
 
             return {
               name: child.name,
@@ -89,22 +81,7 @@ export function useWorldCupData() {
         };
       });
 
-    thirds.sort((a, b) => {
-      const getVal = (entry: any, name: string) => entry.stats.find((s: any) => s.name === name || s.type === name)?.value || 0;
-      const ptsA = getVal(a, 'points');
-      const ptsB = getVal(b, 'points');
-      if (ptsA !== ptsB) return ptsB - ptsA;
-
-      const gdA = getVal(a, 'pointDifferential');
-      const gdB = getVal(b, 'pointDifferential');
-      if (gdA !== gdB) return gdB - gdA;
-
-      const gfA = getVal(a, 'pointsFor');
-      const gfB = getVal(b, 'pointsFor');
-      if (gfA !== gfB) return gfB - gfA;
-
-      return 0;
-    });
+    thirds.sort(sortEspnEntries);
 
     return thirds.slice(0, 8);
   }, [standings]);

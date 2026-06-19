@@ -1,5 +1,4 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Lock, Edit3, ChevronDown, ChevronUp, Shuffle } from 'lucide-react';
 import { 
   ROUND_OF_32, ROUND_OF_16, QUARTERFINALS, SEMIFINALS, FINAL, THIRD 
 } from './utils/constants';
@@ -119,12 +118,7 @@ export default function Simulator({ matches, initialStandings }: { matches: any[
       if (played) { updateStats(home.team.id, hs, as_); updateStats(away.team.id, as_, hs); }
     });
 
-    const sortFn = (a: any, b: any) => {
-      if (b.pts !== a.pts) return b.pts - a.pts;
-      const dA = a.gf - a.gc, dB = b.gf - b.gc;
-      if (dB !== dA) return dB - dA;
-      return b.gf - a.gf;
-    };
+    const sortFn = (a: any, b: any) => b.pts - a.pts || (b.gf - b.gc) - (a.gf - a.gc) || b.gf - a.gf;
 
     const result = Object.entries(groupMap).map(([name, teams]) => {
       teams.sort(sortFn);
@@ -317,28 +311,14 @@ export default function Simulator({ matches, initialStandings }: { matches: any[
           <button
             onClick={fillRandom}
             style={{
-              background: 'transparent',
-              border: '2px solid var(--accent-cyan)',
-              color: 'var(--accent-cyan)',
-              padding: '10px 24px',
-              borderRadius: '99px',
-              fontWeight: 700,
-              fontSize: '0.9rem',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px'
+              background: 'transparent', border: '2px solid var(--accent-cyan)', color: 'var(--accent-cyan)',
+              padding: '10px 24px', borderRadius: '99px', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer',
+              display: 'inline-flex', alignItems: 'center', gap: '8px'
             }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.background = 'var(--accent-cyan-light)';
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.background = 'transparent';
-            }}
+            onMouseOver={(e) => e.currentTarget.style.background = 'var(--accent-cyan-light)'}
+            onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
           >
-            <Shuffle size={16} />
-            Llenar Fase de Grupos Aleatoriamente
+            🔀 Llenar Fase de Grupos Aleatoriamente
           </button>
 
           <button
@@ -427,7 +407,7 @@ export default function Simulator({ matches, initialStandings }: { matches: any[
                     style={{ width: '100%', padding: '11px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-color)', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 600, fontSize: '0.78rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}
                   >
                     <span>Partidos del grupo</span>
-                    {isExpanded ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
+                    {isExpanded ? '🔼' : '🔽'}
                   </button>
 
                   {isExpanded && (
@@ -452,7 +432,7 @@ export default function Simulator({ matches, initialStandings }: { matches: any[
                               {isPlayed ? (
                                 <>
                                   <span style={{ background: 'var(--hover-bg)', color: 'var(--text-primary)', border: '1px solid var(--border-light)', padding: '3px 0', width: '32px', textAlign: 'center', borderRadius: '6px', fontWeight: 800, fontSize: '0.9rem', display: 'inline-block' }}>{home?.score}</span>
-                                  <Lock size={12} color="var(--text-secondary)" />
+                                  <span style={{ fontSize: '0.8rem' }}>🔒</span>
                                   <span style={{ background: 'var(--hover-bg)', color: 'var(--text-primary)', border: '1px solid var(--border-light)', padding: '3px 0', width: '32px', textAlign: 'center', borderRadius: '6px', fontWeight: 800, fontSize: '0.9rem', display: 'inline-block' }}>{away?.score}</span>
                                 </>
                               ) : (
@@ -461,7 +441,7 @@ export default function Simulator({ matches, initialStandings }: { matches: any[
                                     style={{ width: '32px', padding: '4px 0', textAlign: 'center', fontWeight: 700, border: '1.5px solid var(--accent-primary)', borderRadius: '6px', outline: 'none', background: 'transparent', color: 'var(--text-primary)', fontFamily: 'inherit', fontSize: '0.9rem' }}
                                     value={simScores[m.id]?.home ?? ''}
                                     onChange={(e) => handleScoreChange(m.id, 'home', e.target.value)} />
-                                  <Edit3 size={12} color="var(--accent-primary)" />
+                                  <span style={{ fontSize: '0.8rem' }}>✏️</span>
                                   <input type="text" inputMode="numeric" pattern="[0-9]*" maxLength={2}
                                     style={{ width: '32px', padding: '4px 0', textAlign: 'center', fontWeight: 700, border: '1.5px solid var(--accent-primary)', borderRadius: '6px', outline: 'none', background: 'transparent', color: 'var(--text-primary)', fontFamily: 'inherit', fontSize: '0.9rem' }}
                                     value={simScores[m.id]?.away ?? ''}
