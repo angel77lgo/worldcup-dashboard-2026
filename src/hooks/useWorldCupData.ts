@@ -18,12 +18,16 @@ export function useWorldCupData() {
   const [standings, setStandings] = useState<GroupStanding[]>([]);
   const [loading, setLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchData = async (silent = false) => {
     if (!silent) setLoading(true);
     setIsRefreshing(true);
+    setError(null);
 
     try {
+      let hasError = false;
+
       const scoreboardUrl = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates=20260611-20260719&limit=150';
       const matchesRes = await fetch(scoreboardUrl);
       if (matchesRes.ok) {
@@ -31,6 +35,8 @@ export function useWorldCupData() {
         const events: MatchEvent[] = matchesData.events || [];
         events.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
         setMatches(events);
+      } else {
+        hasError = true;
       }
 
       const standingsUrl = 'https://site.api.espn.com/apis/v2/sports/soccer/fifa.world/standings';
@@ -50,9 +56,16 @@ export function useWorldCupData() {
             };
           }));
         }
+      } else {
+        hasError = true;
+      }
+
+      if (hasError) {
+        setError('No se pudieron cargar los datos. Verifica tu conexión.');
       }
     } catch (err) {
       console.error(err);
+      setError('Error de conexión. Reintentando en 60 segundos...');
     } finally {
       setLoading(false);
       setIsRefreshing(false);
@@ -152,6 +165,7 @@ export function useWorldCupData() {
     standings, 
     loading, 
     isRefreshing, 
+    error,
     fetchData,
     bestThirdsRealList,
     bestThirdsReal,

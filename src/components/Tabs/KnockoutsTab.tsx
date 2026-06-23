@@ -8,9 +8,14 @@ import { parsePlaceholderToSlot } from '../../utils/helpers';
 interface KnockoutsTabProps {
   matches: MatchEvent[];
   resolveRealSlot: (slot: string) => any;
+  loading?: boolean;
 }
 
-export function KnockoutsTab({ matches, resolveRealSlot }: KnockoutsTabProps) {
+export function KnockoutsTab({ matches, resolveRealSlot, loading }: KnockoutsTabProps) {
+  if (loading) {
+    return <div className="loader">Cargando eliminatorias...</div>;
+  }
+
   const getMatchBySlug = (slug: string) => matches.filter(m => m.season.slug === slug);
 
   const getESPNMatchNum = (m: MatchEvent): number => {

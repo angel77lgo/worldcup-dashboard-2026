@@ -352,7 +352,7 @@ export default function Simulator({ matches, initialStandings }: { matches: any[
       {/* ===== FASE DE GRUPOS ===== */}
       <div style={{ marginBottom: '60px' }}>
         <SectionTitle title="Fase de Grupos" subtitle="Rellena los marcadores de los partidos pendientes" />
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))', gap: '24px' }}>
+        <div className="sim-groups-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))', gap: '24px' }}>
           {simulatedStandings.map((group: any) => {
             const groupMatchesList = matchesByGroup[group.name] || [];
             const isExpanded = expandedGroups[group.name] || false;

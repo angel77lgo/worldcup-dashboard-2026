@@ -4,10 +4,15 @@ import { getStat } from '../../hooks/useWorldCupData';
 
 interface TeamsTabProps {
   standings: GroupStanding[];
+  loading?: boolean;
 }
 
-export function TeamsTab({ standings }: TeamsTabProps) {
+export function TeamsTab({ standings, loading }: TeamsTabProps) {
   const [searchQuery, setSearchQuery] = useState('');
+
+  if (loading) {
+    return <div className="loader">Cargando equipos...</div>;
+  }
 
   const teamMap: Record<string, { logo: string; pts: number }> = {};
   standings.forEach(g => g.entries.forEach(e => {

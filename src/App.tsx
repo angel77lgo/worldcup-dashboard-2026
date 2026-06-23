@@ -16,6 +16,7 @@ function App() {
     standings, 
     loading, 
     isRefreshing, 
+    error,
     fetchData,
     bestThirdsReal,
     resolveRealSlot
@@ -65,19 +66,26 @@ function App() {
       )}
 
       {activeTab === 'grupos' && (
-        <GroupsTab standings={standings} bestThirdsReal={bestThirdsReal} />
+        <GroupsTab standings={standings} bestThirdsReal={bestThirdsReal} loading={loading} />
       )}
 
       {activeTab === 'eliminatorias' && (
-        <KnockoutsTab matches={matches} resolveRealSlot={resolveRealSlot} />
+        <KnockoutsTab matches={matches} resolveRealSlot={resolveRealSlot} loading={loading} />
       )}
 
       {activeTab === 'estadisticas' && (
-        <TeamsTab standings={standings} />
+        <TeamsTab standings={standings} loading={loading} />
       )}
 
       {activeTab === 'simulador' && (
         <Simulator matches={matches} initialStandings={standings} />
+      )}
+
+      {error && (
+        <div className="error-banner">
+          <span>{error}</span>
+          <button className="error-dismiss" onClick={() => fetchData()}>Reintentar</button>
+        </div>
       )}
     </div>
   );
